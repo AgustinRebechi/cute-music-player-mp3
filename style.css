@@ -1,0 +1,423 @@
+@import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
+
+* {
+    margin: 1px;
+    padding: 0;
+    box-sizing: border-box;
+    user-select: none;
+    opacity: 99.2%;
+    -webkit-user-drag: none;
+}
+
+body {
+    background-color: transparent;
+    font-family: 'Pixelify Sans', sans-serif;
+    font-size: 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.window-controls {
+    position: absolute;
+    top: 10px;
+    right: 80px;
+    z-index: 5;
+    display: flex;
+    gap: 10px;
+}
+
+.window-btn {
+    width: 35px;
+    height: 35px;
+    border: none;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    transition: transform 0.2s ease;
+}
+
+.window-btn:hover {
+    transform: scale(1.1);
+}
+
+.minimizeBtn {
+    background-image: url('./assets/Cinna/ui/minimizar.png');
+}
+
+.closeBtn {
+    background-image: url('./assets/Cinna/ui/cerrar.png');
+}
+
+.pj {
+    position: absolute;
+    width: 380px;
+    margin: 50px auto;
+    top: -250px;
+    left: 14%;
+    transform: translateX(-50%);
+    z-index: 3;
+    pointer-events: none;
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+    100% {
+        transform: translateY(0);
+    }
+}
+
+.main-window {
+    position: relative;
+    margin-top: 155px;
+    opacity: 97%;
+    -webkit-app-region: drag;
+}
+
+#bg-img {
+    width: 445px;
+    height: 690px;
+    position: absolute;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    left:45px;
+}
+
+.title-song {
+    position: absolute;
+    top: 5px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 50px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#bg-title {
+    position: absolute;
+    z-index: 1;
+}
+
+#title {
+    position: relative;
+    z-index: 2;
+    color: #afdfea;
+    text-align: center;
+    margin: 0;
+    font-size: 24px;    
+}
+
+.cover {
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    width: 384px;
+    height: 299px;
+    transform: translateX(-50%);
+    background-image: url("./assets/Cinna/ui/caja3-1.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#cover-bg {
+    position: absolute;
+    background-image: url("assets/Cinna/sanrio-sanrio-characters.gif");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    width: 200px;
+    height: 200px;
+    opacity: 0.8;
+    z-index: 1;
+}
+
+.lyrics-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    height: 300px;
+    padding: 20px;
+    text-align: top;
+}
+
+.lyrics-line {
+    font-size: 20px;
+    font-weight: 500;
+    color: #577e95;
+    margin: 8px 0;
+    opacity: 0.6;
+    transition: all 0.5s ease;
+    transform: scale(0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    line-height: 1.2;
+    min-height: 30px;
+}
+
+.lyrics-line.active {
+    color: #ff8bb3;
+    opacity: 1;
+    transform: scale(1.1);
+    font-weight: bold;
+    text-shadow: 0 2px 4px rgba(255, 139, 179, 0.4);
+    animation: lyricsPulse 1.5s ease;
+}
+
+@keyframes lyricsPulse {
+    0% {
+        transform: scale(1);
+        color: #7bb3d3;
+    }
+    50% {
+        transform: scale(1.15);
+        color: #ff6b9d;
+    }
+    100% {
+        transform: scale(1);
+        color: #f76d9e;
+    }
+}
+
+.progress-bar {
+    position: absolute;
+    top: 380px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 280px;
+    height: 20px;
+    background-image: url("./assets/Cinna/ui/barra2.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 10px;
+    overflow: visible; 
+}
+
+.progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 20px;
+    width: 0%;
+    border-radius: 20%;
+    background: #c3efff; 
+}
+
+.progress::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    right: -15px;
+    width: 40px;
+    height: 40px;
+    background-image: url("./assets/Cinna/ui/corazon.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    animation: heartBeat 1s ease-in-out infinite;
+}
+
+@keyframes heartBeat {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.music-duration {
+    position: absolute;
+    top: 25px;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 14px;
+    color: #666;
+}
+
+.control-panel {
+    position: absolute;
+    top: 460px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 384px;
+    height: 191px;
+    background-image: url("./assets/Cinna/ui/caja2.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.control-decorations {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; 
+}
+
+.barra-decoration1 {
+    position: absolute;
+    bottom: 86px;
+    left: 30px;
+    width: 80px;
+    height: 20px;
+    background-image: url('./assets/Cinna/ui/barra1.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.barra-decoration2 {
+    position: absolute;
+    bottom: 86px;
+    left: 275px;
+    width: 80px;
+    height: 20px;
+    background-image: url('./assets/Cinna/ui/barra1.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.corazones-decoration1 {
+    position: absolute;
+    bottom: 50px;
+    left: 30px;
+    width: 84px;
+    height: 24px;
+    background-image: url('./assets/Cinna/ui/corazones2.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.corazones-decoration2 {
+    position: absolute;
+    bottom: 50px;
+    left: 270px;
+    width: 84px;
+    height: 24px;
+    background-image: url('./assets/Cinna/ui/corazones.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+button {
+    background-color: transparent;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    border: none;
+    cursor: pointer;
+    -webkit-app-region: no-drag;
+    transition: transform 0.3s ease;
+}
+
+button:hover {
+    transform: scale(1.1);
+}
+
+.play-btn { 
+    background-image: url('./assets/Cinna/ui/play.png');
+    width: 136px;
+    height: 136px;
+}
+
+.pause-btn {
+    background-image: url('./assets/Cinna/ui/pausa.png');
+    width: 136px;
+    height: 136px;
+}
+
+.prev-btn {
+    background-image: url('./assets/Cinna/ui/anterior.png');
+    margin-top: -75px;
+    width: 54px;
+    height: 27px;
+}
+
+.next-btn {
+    background-image: url('./assets/Cinna/ui/siguiente.png');
+    margin-top: -75px;
+    width: 54px;
+    height: 27px;
+}
+
+.agos {
+    color: #ff6b9d;
+    position: absolute;
+    top: 660px;
+    left: 290px
+}
+
+.marco {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 510px;
+  height: 10px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.marco-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.purin {
+    position: absolute;
+    top: 0px;
+    left: 335px;
+    transform: translate(-50%, -50%);
+    width: 510px;
+    height: -10px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.purin-img {
+    width: 15%;
+    height: auto;
+    display: block;
+}
+
+.hk {
+    position: absolute;
+    top: 100%;
+    left: 399px;
+    transform: translate(-50%, -50%);
+    width: 510px;
+    height: 40px;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.hk-img {
+    width: 10%;
+    height: auto;
+    display: block;
+}

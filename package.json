@@ -1,0 +1,19 @@
+{
+  "name": "para-agos",
+  "version": "1.0.0",
+  "description": "Reproductor mp3 para agosita",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "dist": "electron-builder --publish=never"
+  },
+  "keywords": [],
+  "author": "Agustin Rebechi",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^38.0.0",
+    "electron-builder": "^26.0.12",
+    "electron-reload": "^2.0.0-alpha.1"
+  }
+}

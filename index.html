@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Con mucho amor para Agos</title>
+    <link rel="stylesheet" href="style.css"> 
+</head>
+<body>
+    <div class="window-controls">
+        <button class="window-btn minimizeBtn" onclick="minimizeWindow()"></button>
+        <button class="window-btn closeBtn" onclick="closeWindow()"></button>
+    </div>
+
+    <div class="main-window">
+        
+        <img src="assets/Cinna/ui/caja1.png" id="bg-img">
+        <img src="assets/Cinna/cinna1.png" class="pj">
+        <div class="marco"></div>
+        
+        <div class="marco">
+        <img src="assets/marco.png" class="marco-img">
+        </div>
+
+        <div class="purin"><img src="assets/purin.gif" class="purin-img"></div>
+        <div class="hk"><img src="assets/purin2.png" class="hk-img"></div>
+                
+
+        
+        <div class="title-song">
+            <img src="assets/Cinna/ui/caja4.png" id="bg-title">
+            <h2 id="title"></h2>
+        </div>
+
+        <div class="cover">
+            <div class="cover-bg" id="cover-bg"></div>
+            <!-- Área de lyrics -->
+            <div class="lyrics-container">
+                <div class="lyrics-line" id="lyricsLine1"></div>
+                <div class="lyrics-line" id="lyricsLine2"></div>
+                <div class="lyrics-line" id="lyricsLine3"></div>
+            </div>
+        </div>
+
+        <div class="progress-bar" id="progressContainer">
+            <div class="progress" id="progress"></div>
+            <div class="music-duration">
+                <span id="current-time">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <!-- Decoraciones del control panel -->
+            <div class="control-decorations">
+                <div class="barra-decoration1"></div>
+                <div class="barra-decoration2"></div>
+                <div class="corazones-decoration1"></div>
+                <div class="corazones-decoration2"></div>
+            </div>
+            
+            <!-- Botones de control -->
+            <button id="prev" class="prev-btn"></button>            
+            <button id="playPause" class="play-btn"></button>
+            <button id="next" class="next-btn"></button>
+        </div>        
+    </div>
+
+    <h4 class="agos">Te amo, Agos<3</h4>
+
+    <!-- Audio element -->
+    <audio id="audioPlayer" preload="metadata"></audio>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+        const fs = require('fs');
+        const path = require('path');
+        
+        let isPlaying = false;
+        let isDragging = false;
+        let currentSongIndex = 0;
+        let playlist = [];
+        let currentLyrics = [];
+        let lyricsInterval;
+        let wasPlayingBeforeSkip = false; // Nueva variable para controlar el estado de reproducción
+        
+        const playButton = document.getElementById('playPause');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const progressBar = document.getElementById('progress');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeDisplay = document.getElementById('current-time');
+        const durationDisplay = document.getElementById('duration');
+        const titleDisplay = document.getElementById('title');
+        const lyricsLine1 = document.getElementById('lyricsLine1');
+        const lyricsLine2 = document.getElementById('lyricsLine2');
+        const lyricsLine3 = document.getElementById('lyricsLine3');
+
+        // Función para actualizar la UI del botón play/pause
+        function updatePlayButtonUI(playing) {
+            if (playing) {
+                playButton.className = 'pause-btn';
+                isPlaying = true;
+            } else {
+                playButton.className = 'play-btn';
+                isPlaying = false;
+            }
+        }
+
+        // Cargar playlist al inicio
+        function loadPlaylist() {
+            try {
+                const songsDir = path.join(__dirname, 'songs');
+                const files = fs.readdirSync(songsDir);
+                
+                playlist = files
+                    .filter(file => file.endsWith('.mp3'))
+                    .map(file => ({
+                        filename: file,
+                        path: path.join(songsDir, file),
+                        title: file.replace('.mp3', ''),
+                        lyricsFile: path.join(songsDir, file.replace('.mp3', '.lrc'))
+                    }));
+                
+                if (playlist.length > 0) {
+                    loadSong(0);
+                } else {
+                    titleDisplay.textContent = 'No se encontraron canciones';
+                }
+            } catch (error) {
+                console.error('Error cargando playlist:', error);
+                titleDisplay.textContent = 'Error cargando canciones';
+            }
+        }
+
+        // Cargar una canción específica
+        function loadSong(index, autoplay = false) {
+            if (index >= 0 && index < playlist.length) {
+                currentSongIndex = index;
+                const song = playlist[index];
+                
+                audioPlayer.src = song.path;
+                titleDisplay.textContent = song.title;
+                
+                // Cargar lyrics si existen
+                loadLyrics(song.lyricsFile);
+                
+                // Reset UI
+                progressBar.style.width = '0%';
+                currentTimeDisplay.textContent = '0:00';
+                durationDisplay.textContent = '0:00';
+                clearLyrics();
+
+                // Si debe reproducirse automáticamente
+                if (autoplay) {
+                    audioPlayer.addEventListener('loadeddata', function playWhenReady() {
+                        audioPlayer.play().then(() => {
+                            updatePlayButtonUI(true);
+                        }).catch(error => {
+                            console.error('Error al reproducir automáticamente:', error);
+                            updatePlayButtonUI(false);
+                        });
+                        audioPlayer.removeEventListener('loadeddata', playWhenReady);
+                    });
+                } else {
+                    updatePlayButtonUI(false);
+                }
+            }
+        }
+
+        // Cargar archivo LRC
+        function loadLyrics(lyricsPath) {
+            try {
+                if (fs.existsSync(lyricsPath)) {
+                    const lyricsContent = fs.readFileSync(lyricsPath, 'utf8');
+                    currentLyrics = parseLRC(lyricsContent);
+                } else {
+                    currentLyrics = [];
+                    console.log('No se encontró archivo de lyrics:', lyricsPath);
+                }
+            } catch (error) {
+                console.error('Error cargando lyrics:', error);
+                currentLyrics = [];
+            }
+        }
+
+        // Parser para formato LRC
+        function parseLRC(lrcContent) {
+            const lyrics = [];
+            const lines = lrcContent.split('\n');
+            
+            for (const line of lines) {
+                const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2})\](.*)/);
+                if (match) {
+                    const minutes = parseInt(match[1]);
+                    const seconds = parseInt(match[2]);
+                    const centiseconds = parseInt(match[3]);
+                    const text = match[4].trim();
+                    
+                    const timeInSeconds = minutes * 60 + seconds + (centiseconds / 100);
+                    lyrics.push({ time: timeInSeconds, text: text });
+                }
+            }
+            
+            return lyrics.sort((a, b) => a.time - b.time);
+        }
+
+        // Limpiar lyrics
+        function clearLyrics() {
+            lyricsLine1.textContent = '';
+            lyricsLine2.textContent = '';
+            lyricsLine3.textContent = '';
+            lyricsLine1.className = 'lyrics-line';
+            lyricsLine2.className = 'lyrics-line';
+            lyricsLine3.className = 'lyrics-line';
+        }
+
+        // Actualizar lyrics en tiempo real
+        function updateLyrics() {
+            if (currentLyrics.length === 0) return;
+            
+            const currentTime = audioPlayer.currentTime;
+            let currentLyricIndex = -1;
+            
+            // Encontrar la línea actual
+            for (let i = 0; i < currentLyrics.length; i++) {
+                if (currentLyrics[i].time <= currentTime) {
+                    currentLyricIndex = i;
+                } else {
+                    break;
+                }
+            }
+            
+            // Mostrar líneas: anterior, actual, siguiente
+            if (currentLyricIndex >= 0) {
+                const prevLine = currentLyricIndex > 0 ? currentLyrics[currentLyricIndex - 1] : null;
+                const currentLine = currentLyrics[currentLyricIndex];
+                const nextLine = currentLyricIndex < currentLyrics.length - 1 ? currentLyrics[currentLyricIndex + 1] : null;
+                
+                lyricsLine1.textContent = prevLine ? prevLine.text : '';
+                lyricsLine2.textContent = currentLine ? currentLine.text : '';
+                lyricsLine3.textContent = nextLine ? nextLine.text : '';
+                
+                // Animar línea actual
+                lyricsLine1.className = 'lyrics-line';
+                lyricsLine2.className = 'lyrics-line active';
+                lyricsLine3.className = 'lyrics-line';
+            }
+        }
+
+        // Cargar metadata del audio
+        audioPlayer.addEventListener('loadedmetadata', function() {
+            if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
+                const minutes = Math.floor(audioPlayer.duration / 60);
+                const seconds = Math.floor(audioPlayer.duration % 60);
+                durationDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        });
+
+        // Actualizar progreso mientras se reproduce
+        audioPlayer.addEventListener('timeupdate', function() {
+            if (!isDragging && audioPlayer.duration) {
+                const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
+                progressBar.style.width = progress + '%';
+                
+                const minutes = Math.floor(audioPlayer.currentTime / 60);
+                const seconds = Math.floor(audioPlayer.currentTime % 60);
+                currentTimeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Actualizar lyrics
+                updateLyrics();
+            }
+        });
+
+        // Funcionalidad de play/pause
+        playButton.addEventListener('click', function() {
+            if (isPlaying) {
+                audioPlayer.pause();
+                updatePlayButtonUI(false);
+            } else {
+                audioPlayer.play().then(() => {
+                    updatePlayButtonUI(true);
+                }).catch(error => {
+                    console.error('Error al reproducir:', error);
+                    alert('Error al cargar la canción');
+                });
+            }
+        });
+
+        // Cuando termine la canción, ir a la siguiente Y reproducir automáticamente
+        audioPlayer.addEventListener('ended', function() {
+            wasPlayingBeforeSkip = true; // La canción terminó, por lo tanto estaba reproduciéndose
+            nextSong();
+        });
+        
+        // Click en la barra de progreso
+        progressContainer.addEventListener('mousedown', function(e) {
+            if (audioPlayer.duration) {
+                isDragging = true;
+                updateProgress(e);
+            }
+        });
+
+        // Arrastrar el corazón
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                updateProgress(e);
+            }
+        });
+
+        // Soltar el corazón
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        // Función para actualizar el progreso al arrastrar
+        function updateProgress(e) {
+            const rect = progressContainer.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            let newProgress = (clickX / rect.width) * 100;
+            
+            newProgress = Math.max(0, Math.min(100, newProgress));
+            progressBar.style.width = newProgress + '%';
+            
+            if (audioPlayer.duration) {
+                audioPlayer.currentTime = (newProgress / 100) * audioPlayer.duration;
+                
+                const minutes = Math.floor(audioPlayer.currentTime / 60);
+                const seconds = Math.floor(audioPlayer.currentTime % 60);
+                currentTimeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Canción anterior
+        function previousSong() {
+            wasPlayingBeforeSkip = isPlaying; // Guardar el estado actual
+            const newIndex = currentSongIndex > 0 ? currentSongIndex - 1 : playlist.length - 1;
+            loadSong(newIndex, wasPlayingBeforeSkip);
+        }
+
+        // Siguiente canción
+        function nextSong() {
+            wasPlayingBeforeSkip = wasPlayingBeforeSkip || isPlaying; // Guardar el estado actual
+            const newIndex = currentSongIndex < playlist.length - 1 ? currentSongIndex + 1 : 0;
+            loadSong(newIndex, wasPlayingBeforeSkip);
+        }
+
+        // Botones de navegación
+        document.getElementById('prev').addEventListener('click', previousSong);
+        document.getElementById('next').addEventListener('click', nextSong);
+
+        // Funciones de ventana
+        function minimizeWindow() {
+            ipcRenderer.send('minimize-window');
+        }
+
+        function closeWindow() {
+            ipcRenderer.send('close-window');
+        }
+
+        // Error handling para el audio
+        audioPlayer.addEventListener('error', function(e) {
+            console.error('Error de audio:', e);
+            wasPlayingBeforeSkip = isPlaying; // Guardar estado antes del error
+            nextSong(); // Intentar siguiente canción si hay error
+        });
+
+        // Event listeners adicionales para controlar el estado del botón
+        audioPlayer.addEventListener('play', function() {
+            updatePlayButtonUI(true);
+        });
+
+        audioPlayer.addEventListener('pause', function() {
+            updatePlayButtonUI(false);
+        });
+
+        // Inicializar al cargar la página
+        window.addEventListener('DOMContentLoaded', function() {
+            loadPlaylist();
+        });
+    </script>
+</body>
+</html>
