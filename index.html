@@ -18,12 +18,13 @@
         <div class="click-indicator">Click para continuar...</div>
     </div>
 
-    <div class="window-controls">
-        <button class="window-btn minimizeBtn" onclick="minimizeWindow()"></button>
-        <button class="window-btn closeBtn" onclick="closeWindow()"></button>
-    </div>
+    
 
     <div class="main-window">
+        <div class="window-controls">
+            <button class="window-btn minimizeBtn" onclick="minimizeWindow()"></button>
+            <button class="window-btn closeBtn" onclick="closeWindow()"></button>
+        </div>
         
         <img src="assets/Cinna/ui/caja1.png" id="bg-img">
         <img src="assets/Cinna/cinna1.png" class="pj">
@@ -113,6 +114,7 @@
         let wasPlayingBeforeSkip = false;
         let isShuffleMode = false;
         let currentVolume = 0.7; // Volumen por defecto 70%
+        let lastCommentTime = -1; // ← Agrega esta línea
         
         const playButton = document.getElementById('playPause');
         const audioPlayer = document.getElementById('audioPlayer');
@@ -131,26 +133,33 @@
         const volumeContainer = document.getElementById('volumeContainer');
         const volumeProgress = document.getElementById('volumeProgress');
         const shuffleBtn = document.getElementById('shuffleBtn');
+        const startScreen = document.getElementById('startScreen');
+        const introTextEl = document.getElementById('introText');
 
         const introMessages = [
-        "¡Hola mi amor! 💕",
-        "Te hice este reproductor especial...",
-        "¡Con todas tus canciones favoritas!",
-        "¡Espero que te guste mucho! ✨",
-        "¡Dale click para empezar! 🎵"
+        "hola mibida, como estas?",
+        "espero estes teniendo un hermoso dia sisisi",
+        "te amo mucho <3",
         ];
 
         let currentMessageIndex = 0;
         let isTyping = false;
 
         const CUSTOM_ORDER = [
-            'Fade Into You - Mazzy Star.mp3',
-            'Dream a Little Dream of Me - Ella Fitzgerald.mp3',
-            'La Vie En Rose - Édith Piaf.mp3',
-            'Moon River - Audrey Hepburn.mp3',
-            'Fly Me to the Moon - Frank Sinatra.mp3'
-            // Agrega aquí tus canciones en el orden que prefieras
+            'Favourite - Fontaines D.C.mp3',
+            'Fade Into You - Mazzy Star.mp3'
         ];
+
+        // Comentarios específicos por canción y tiempo
+        const songComments = {
+            'Fade Into You - Mazzy Star': {
+                0.0: "asd"
+            },
+            'Favourite - Fontaines D.C': {
+                0.0: "holi"
+            }
+
+        };
 
         // Función para actualizar la UI del botón play/pause
         function updatePlayButtonUI(playing) {
@@ -226,6 +235,7 @@
         function loadSong(index, autoplay = false) {
             if (index >= 0 && index < playlist.length) {
                 currentSongIndex = index;
+                lastCommentTime = -1;
                 const song = playlist[index];
                 
                 audioPlayer.src = song.path;
@@ -334,6 +344,9 @@
                 lyricsLine1.className = 'lyrics-line';
                 lyricsLine2.className = 'lyrics-line active';
                 lyricsLine3.className = 'lyrics-line';
+                
+                // COMENTARIOS DE CINNA
+                checkForCinnaComments(currentTime, currentLine ? currentLine.text : '');
             }
         }
 
@@ -496,14 +509,37 @@
         document.getElementById('prev').addEventListener('click', previousSong);
         document.getElementById('next').addEventListener('click', nextSong);
 
-        // Funciones de ventana
         function minimizeWindow() {
-            ipcRenderer.send('minimize-window');
+            const mainWindow = document.querySelector('.main-window');
+            const minimizeBtn = document.querySelector('.minimizeBtn');
+            
+            // Animar el botón
+            minimizeBtn.style.animation = 'minimizeAnim 0.5s ease-out';
+            
+            // Animar la ventana
+            mainWindow.classList.add('minimizing');
+            
+            setTimeout(() => {
+                ipcRenderer.send('minimize-window');
+                mainWindow.classList.remove('minimizing');
+                minimizeBtn.style.animation = ''; // Reset animation
+            }, 500);
         }
 
         function closeWindow() {
-            ipcRenderer.send('close-window');
-        }
+            const mainWindow = document.querySelector('.main-window');
+            const closeBtn = document.querySelector('.closeBtn');
+            
+            // Animar el botón
+            closeBtn.style.animation = 'closeAnim 0.5s ease-out';
+            
+            // Animar la ventana
+            mainWindow.classList.add('closing');
+            
+            setTimeout(() => {
+                ipcRenderer.send('close-window');
+            }, 500);
+        }        
 
         // Error handling para el audio
         audioPlayer.addEventListener('error', function(e) {
@@ -521,41 +557,47 @@
             updatePlayButtonUI(false);
         });
 
-        window.addEventListener('DOMContentLoaded', function() {
-            // Iniciar con la pantalla de introducción
-            document.getElementById('startScreen').addEventListener('click', handleIntroClick);
-            
-            // Comenzar con el primer mensaje
-            setTimeout(() => {
-                const introText = document.getElementById('introText');
-                typeText(introMessages[0], introText);
-                currentMessageIndex = 1;
-            }, 1500);
+        window.addEventListener('DOMContentLoaded', () => {
+            // Iniciar el primer mensaje automáticamente
+            typeText(introMessages[0], introTextEl);
+            currentMessageIndex = 1;
+    
+            // Configurar el handler para los   siguientes clicks
+            startScreen.addEventListener('click', handleIntroClick);
         });
 
-        
+        // Primer click: desbloquea audio y arranca el primer mensaje
+        function startFirstMessage() {
+            const introText = document.getElementById('introText');
+            typeText(introMessages[0], introText);
+            currentMessageIndex = 1;
 
-        // Función para escribir texto tipo Undertale
+            // Ahora configuramos el handler para los siguientes clicks
+            startScreen.addEventListener('click', handleIntroClick);
+        }
+
+        function unlockAudio() {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume().catch(() => {});
+            }
+        }
+
         function typeText(text, element, callback) {
             if (isTyping) return;
             isTyping = true;
-            
             element.textContent = '';
             let index = 0;
-            
+
             const typeInterval = setInterval(() => {
                 if (index < text.length) {
                     element.textContent += text[index];
                     index++;
-                    
-                    // Sonido de escritura (opcional)
-                    // playTypeSound();
                 } else {
                     clearInterval(typeInterval);
                     isTyping = false;
                     if (callback) callback();
                 }
-            }, 50); // Velocidad de escritura
+            }, 70);
         }
 
         // Manejar clicks en pantalla de inicio
@@ -563,8 +605,8 @@
             if (isTyping) return;
             
             if (currentMessageIndex < introMessages.length) {
-                const introText = document.getElementById('introText');
-                typeText(introMessages[currentMessageIndex], introText);
+                // Si todavía hay mensajes, muestra el siguiente
+                typeText(introMessages[currentMessageIndex], introTextEl);
                 currentMessageIndex++;
             } else {
                 // Terminar introducción
@@ -572,7 +614,6 @@
             }
         }
 
-        // Iniciar aplicación principal
         function startMainApp() {
             const startScreen = document.getElementById('startScreen');
             const mainWindow = document.querySelector('.main-window');
@@ -582,7 +623,8 @@
             setTimeout(() => {
                 startScreen.style.display = 'none';
                 mainWindow.style.display = 'block';
-                loadPlaylist(); // Cargar playlist después de la intro
+                mainWindow.style.animation = 'mainWindowAppear 1.5s';
+                loadPlaylist();
             }, 1000);
         }
 
@@ -593,88 +635,101 @@
         }
         `;        
 
-// Función para que Cinna comente durante las canciones
-function showCinnaSpeech(text, duration = 3000) {
-    const cinnaSpeeech = document.getElementById('cinnaSpeech');
-    const cinnaText = document.getElementById('cinnaText');
-    
-    cinnaText.textContent = text;
-    cinnaSpeeech.style.display = 'block';
-    
-    // Ocultar después del tiempo especificado
-    setTimeout(() => {
-        cinnaSpeeech.style.display = 'none';
-    }, duration);
-}
-
-// Modificar la función updateLyrics para agregar comentarios
-function updateLyrics() {
-    if (currentLyrics.length === 0) return;
-    
-    const currentTime = audioPlayer.currentTime;
-    let currentLyricIndex = -1;
-    
-    // Encontrar la línea actual
-    for (let i = 0; i < currentLyrics.length; i++) {
-        if (currentLyrics[i].time <= currentTime) {
-            currentLyricIndex = i;
-        } else {
-            break;
+        // Función para que Cinna comente durante las canciones
+        function showCinnaSpeech(text, duration = 3000) {
+            const cinnaSpeeech = document.getElementById('cinnaSpeech');
+            const cinnaText = document.getElementById('cinnaText');
+            
+            const formattedText = formatTextForBubble(text, 25);
+            
+            cinnaText.textContent = formattedText;
+            cinnaSpeeech.style.display = 'block';
+            cinnaSpeeech.style.display = 'block';
+            
+            // Ocultar después del tiempo especificado
+            setTimeout(() => {
+                cinnaSpeeech.style.display = 'none';
+            }, duration);
         }
-    }
-    
-    // Mostrar líneas: anterior, actual, siguiente
-    if (currentLyricIndex >= 0) {
-        const prevLine = currentLyricIndex > 0 ? currentLyrics[currentLyricIndex - 1] : null;
-        const currentLine = currentLyrics[currentLyricIndex];
-        const nextLine = currentLyricIndex < currentLyrics.length - 1 ? currentLyrics[currentLyricIndex + 1] : null;
-        
-        lyricsLine1.textContent = prevLine ? prevLine.text : '';
-        lyricsLine2.textContent = currentLine ? currentLine.text : '';
-        lyricsLine3.textContent = nextLine ? nextLine.text : '';
-        
-        // Animar línea actual
-        lyricsLine1.className = 'lyrics-line';
-        lyricsLine2.className = 'lyrics-line active';
-        lyricsLine3.className = 'lyrics-line';
-        
-        // AGREGAR COMENTARIOS DE CINNA EN MOMENTOS ESPECÍFICOS
-        checkForCinnaComments(currentTime, currentLine ? currentLine.text : '');
+        // Función para formatear texto con saltos de línea
+        function formatTextForBubble(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            
+            const words = text.split(' ');
+            let lines = [];
+            let currentLine = '';
+            
+            words.forEach(word => {
+                if ((currentLine + word).length <= maxLength) {
+                    currentLine += (currentLine ? ' ' : '') + word;
+                } else {
+                    lines.push(currentLine);
+                    currentLine = word;
+                }
+            });
+            
+            if (currentLine) lines.push(currentLine);
+            return lines.join('\n');
         }
-        }
-
-        // Función para comentarios específicos
+            
         function checkForCinnaComments(currentTime, currentLyric) {
-            // Comentarios en tiempos específicos (ejemplo)
-            const timeComments = {
-                3.25: "¡Esta parte me encanta! 💕",
-                15.5: "¿No es hermosa esta canción?",
-                30.0: "Pensé en ti cuando la elegí ✨",
-                60.0: "¡Bailemos juntos! 💃"
-            };
+            const currentSong = playlist[currentSongIndex]?.title;
             
-            // Comentarios basados en letras específicas
-            const lyricComments = {
-                "dream": "¡Como mis sueños contigo! 🌙",
-                "love": "Te amo tanto 💖",
-                "moon": "Como cuando vemos la luna juntos 🌙",
-                "fly": "¡Volemos juntos! ✈️"
-            };
+            if (!currentSong || !songComments[currentSong]) return;
             
-            // Verificar comentarios por tiempo (con tolerancia de 0.1 segundos)
-            Object.keys(timeComments).forEach(time => {
-                if (Math.abs(currentTime - parseFloat(time)) < 0.1) {
-                    showCinnaSpeech(timeComments[time]);
-                }
-            });
+            const songData = songComments[currentSong];
             
-            // Verificar comentarios por letras
-            Object.keys(lyricComments).forEach(word => {
-                if (currentLyric.toLowerCase().includes(word)) {
-                    showCinnaSpeech(lyricComments[word]);
+            Object.keys(songData).forEach(time => {
+                const targetTime = parseFloat(time);
+                if (Math.abs(currentTime - targetTime) < 0.2 && lastCommentTime !== targetTime) {
+                    showCinnaSpeech(songData[time]);
+                    lastCommentTime = targetTime;
                 }
             });
         }
+
+        // ===== Web Audio API para sonido de tipeo =====
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        let typeBuffer = null;
+        let typeSoundEnabled = true;
+        // Crear un nodo de ganancia global
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 0.1; // volumen 15% (ajustá a gusto)
+        gainNode.connect(audioCtx.destination);
+
+        // Cargar el archivo de sonido una sola vez
+        function loadTypeSound() {
+            const typePath = path.join(__dirname, 'assets', 'sounds', 'type.mp3');
+            try {
+                const data = fs.readFileSync(typePath);
+                const arrayBuffer = data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+                audioCtx.decodeAudioData(arrayBuffer).then(decoded => {
+                    typeBuffer = decoded;
+                }).catch(err => console.error('decodeAudioData error', err));
+            } catch (err) {
+                console.error('No se pudo leer type.mp3', err);
+            }
+        }
+
+        // Reproducir el "tic" de tipeo
+        function playTypeSound() {
+            if (!typeBuffer || !typeSoundEnabled) return;
+            const src = audioCtx.createBufferSource();
+            src.buffer = typeBuffer;
+            src.connect(gainNode); 
+            src.start(0);
+            src.start(0);
+            src.stop(audioCtx.currentTime + 0.05);
+
+        }
+
+        // Desactivar sonidos de tipeo (ej: al pasar a la ventana principal)
+        function stopTypeSounds() {
+            typeSoundEnabled = false;
+        }
+
+
     </script>
 </body>
 </html>
