@@ -629,7 +629,7 @@ button:hover {
 
 .intro-text {
     font-family: 'Pixelify Sans', sans-serif;
-    font-size: 18px;
+    font-size: 24px;
     color: #333;
     min-height: 10px;
     line-height: 1.4;
@@ -638,10 +638,11 @@ button:hover {
 
 .click-indicator {
     position: absolute;
-    bottom: 210px;
+    bottom: 180px;
     color: white;
     font-size: 16px;
     justify-content: center;
+    animation: 2s ease-out forwards;
     animation: blink 1.5s infinite;
 }
 
@@ -650,7 +651,6 @@ button:hover {
     51%, 100% { opacity: 0; }
 }
 
-/* Ocultar contenido principal inicialmente */
 .main-window {
     display: none;
 }
@@ -679,20 +679,25 @@ button:hover {
 }
 
 .cinna-speech-text {
-    font-size: 14px;
+    font-size: 16px;
     color: #333;
     line-height: 1.3;
     text-align: center;
 }
 
-.cinna-bubble-arrow {
+.cinna-speech-bubble::after {
+    content: '';
     position: absolute;
-    bottom: -9px;
-    left: 50%;
-    transform: translateX(-50%);
     width: 0;
     height: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-top: 8px solid #9afffa;
+    top: 50%;
+    right: 100%;
+    margin-top: -8px;
+    border-top: 8px solid transparent;
+    border-bottom: 8px solid transparent;
+    border-right: 8px solid #90d6ff;
+}
+
+.cover {
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }

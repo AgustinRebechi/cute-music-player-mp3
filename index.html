@@ -12,10 +12,9 @@
             <img src="assets/Cinna/cinnamoroll.gif" id="cinnaIntro" class="cinna-intro-img">
             <div class="speech-bubble">
                 <div id="introText" class="intro-text"></div>
-                <div class="bubble-arrow"></div>
             </div>
         </div>
-        <div class="click-indicator">Click para continuar...</div>
+        <div class="click-indicator">clicksito para seguir sisisi</div>
     </div>
 
     
@@ -113,8 +112,8 @@
         let lyricsInterval;
         let wasPlayingBeforeSkip = false;
         let isShuffleMode = false;
-        let currentVolume = 0.7; // Volumen por defecto 70%
-        let lastCommentTime = -1; // ← Agrega esta línea
+        let currentVolume = 0.7; 
+        let lastCommentTime = -1;
         
         const playButton = document.getElementById('playPause');
         const audioPlayer = document.getElementById('audioPlayer');
@@ -126,10 +125,7 @@
         const lyricsLine1 = document.getElementById('lyricsLine1');
         const lyricsLine2 = document.getElementById('lyricsLine2');
         const lyricsLine3 = document.getElementById('lyricsLine3');
-
         const volumeIcon = document.getElementById('volumeIcon');
-        
-        // Nuevos elementos
         const volumeContainer = document.getElementById('volumeContainer');
         const volumeProgress = document.getElementById('volumeProgress');
         const shuffleBtn = document.getElementById('shuffleBtn');
@@ -137,9 +133,10 @@
         const introTextEl = document.getElementById('introText');
 
         const introMessages = [
-        "hola mibida, como estas?",
-        "espero estes teniendo un hermoso dia sisisi",
-        "te amo mucho <3",
+        "Hola mibida ¿Cómo estas?",
+        "Espero estes teniendo un bonito dia sisisi",
+        "Si no es el caso, quiero que sepas que siempre quiero y voy a estar junto a vos, no importa que pase",
+        "Te amo mucho <3",
         ];
 
         let currentMessageIndex = 0;
@@ -150,16 +147,39 @@
             'Fade Into You - Mazzy Star.mp3'
         ];
 
-        // Comentarios específicos por canción y tiempo
         const songComments = {
             'Fade Into You - Mazzy Star': {
-                0.0: "asd"
+                1.0: "oaaaaa"
             },
             'Favourite - Fontaines D.C': {
-                0.0: "holi"
+                1.0: "No sabes la cantidad de veces que escuche esta canción en abril nyehehe",
+                7.0: "siempre fuiste, sos y seguiras siendo mi favorita mibida<3",
+                13.0: "Te hice agarrar los anteojos para ver esta letrita?",
+                18.0: "Era muy compliqueti hacerlo mas grande, perdon puch",
+                24.0:"Cualquier cosa te deje esta playlist en mi spoti",
+                33.0: "For a long timee",
+                39.0: "con el botoncito que hay 2 flechas podes ponerlo aleatorio",
+                45.0: "pero esta en este orden por defecto sisis",
+                51.0: "y la playlist de spoti podes ver la fecha que añadi las canciones nyehehe"
             }
-
         };
+        
+        const coverImages = [
+            'caja3-1.png',
+            'caja3-2.png',
+            'caja3-3.png',
+            'caja3-4.png',
+            'caja3-5.png',
+            'caja3-6.png',
+            'caja3-7.png',
+            'caja3-8.png',
+            'caja3-9.png',
+            'caja3-10.png',
+            'caja3-11.png',
+            'caja3-12.png',
+            'caja3-13.png',
+            'caja3-14.png',
+        ]
 
         // Función para actualizar la UI del botón play/pause
         function updatePlayButtonUI(playing) {
@@ -240,6 +260,10 @@
                 
                 audioPlayer.src = song.path;
                 titleDisplay.textContent = song.title;
+
+                const coverIndex = currentSongIndex % coverImages.length;
+                const newCoverPath = `./assets/Cinna/ui/${coverImages[coverIndex]}`;
+                changeCoverWithAnimation(newCoverPath);
                 
                 // Cargar lyrics si existen
                 loadLyrics(song.lyricsFile);
@@ -312,6 +336,24 @@
             lyricsLine1.className = 'lyrics-line';
             lyricsLine2.className = 'lyrics-line';
             lyricsLine3.className = 'lyrics-line';
+        }
+
+        function changeCoverWithAnimation(newImagePath) {
+            const cover = document.querySelector('.cover');
+            
+            // Animación de salida
+            cover.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            cover.style.opacity = '0';
+            cover.style.transform = 'translateX(-50%) scale(0.9)';
+            
+            setTimeout(() => {
+                // Cambiar la imagen
+                cover.style.backgroundImage = `url("${newImagePath}")`;
+                
+                // Animación de entrada
+                cover.style.opacity = '1';
+                cover.style.transform = 'translateX(-50%) scale(1)';
+            }, 250);
         }
 
         // Actualizar lyrics en tiempo real
@@ -636,7 +678,7 @@
         `;        
 
         // Función para que Cinna comente durante las canciones
-        function showCinnaSpeech(text, duration = 3000) {
+        function showCinnaSpeech(text, duration = 5000) {
             const cinnaSpeeech = document.getElementById('cinnaSpeech');
             const cinnaText = document.getElementById('cinnaText');
             
