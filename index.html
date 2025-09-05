@@ -133,9 +133,10 @@
         const introTextEl = document.getElementById('introText');
 
         const introMessages = [
-        "Hola mibida ¿Cómo estas?",
-        "Espero estes teniendo un bonito dia sisisi",
-        "Si no es el caso, quiero que sepas que siempre quiero y voy a estar junto a vos, no importa que pase",
+        "Hola mibida ¿Cómo estás?",
+        "Espero estes teniendo un bonito dia",
+        "Si no es el caso, no te preocupes. Quiero que sepas que siempre voy a estar para vos, no importa lo que pase",
+        "cada vez que estas mal se me derrumba el mundo :(",
         "Te amo mucho <3",
         ];
 
@@ -144,24 +145,154 @@
 
         const CUSTOM_ORDER = [
             'Favourite - Fontaines D.C.mp3',
-            'Fade Into You - Mazzy Star.mp3'
+            'Love Takes Miles - Cameron Winter.mp3',
+            'For Lovers - Lamp.mp3',
+            'Love Songs On The Radio - Mojave 3.mp3',
+            'Here, There and Everywhere - Emmylou Harris.mp3',
+            'Fade Into You - Mazzy Star.mp3',
+
+            'All I Wanted - Paramore.mp3',
+            'James Dean & Audrey Hepburn - SWS.mp3',
+
+            'Till There Was You - The Beatles.mp3',
+            'Thirteen - Big Star.mp3',
+
+            'Milk - Sweet Trip.mp3',
+            '슈게이저 - Misty Blue.mp3',
+            '妖精の手招き - Ichiko Aoba.mp3',
+            "j's lullaby - Delaney Bailey.mp3",
+            'A Waltz For a Night - Julie Delpy.mp3',
+            'The Fairest of the Seasons - Nico.mp3',
+
+            'Save Me a Place - Fleetwood Mac.mp3',
+            'In My Life - The Beatles.mp3',
+            'Deirdre - Beach Boys.mp3',
+
+            'My One And Only Love - John Coltrane.mp3',
+            "I'm Glad There Is You - Julie London.mp3",
+
+            'Picture Me Better - Weyes Blood.mp3',
+            'Sidelines - Phoebe Bridgers.mp3',
+
+            "I Don't Care If You're Contagious - PTV.mp3",
+            
+            "First Day of My Life - Bright Eyes.mp3",
+            'You Belong to Me - Jason Wade.mp3',
+            "Nous sommes la réalité - socunbohemio.mp3",
+            'Zombie Girl - Adrianne Lenker.mp3',
+            
+            'Well I Wonder - The Smiths.mp3', 
+
+            'Be My Angel - Mazzy Star.mp3',
+            'Halah - Mazzy Star.mp3',
+    
+            'God Only Knows - The Beach Boys.mp3',
+            'Songbird - Fleetwood Mac.mp3',
+            'Kiss Me - Sixpence None the Richer.mp3',
+            'Music When The Lights Go Out - The Libertines.mp3',
+
+            'Reel Around the Fountain - The Smiths.mp3',
+            'Everybody Here Wants You - Jeff Buckley.mp3',
+            'Hair and Skin - Mazzy Star.mp3',
+
+            'About You - The 1975.mp3',
+            'By Starlight - Smashing Pumpkins.mp3',
+            'Invisible - Sunlid.mp3',
+
+            "I Won't Share You - The Smiths.mp3",
+
+            'How Deep Is Your Love - Bee Gees.mp3',
+
+            'Help me - Joni Mitchell.mp3',
+
+            'Please, Please, Please, Let Me Get What I Want - The Smiths.mp3',
+
+            'Treacherous - Taylor Swift.mp3',
+            'Stay Stay Stay - Taylor Swift.mp3',
+            'Hate To See Your Heart Break - Paramore.mp3',
+            'Deshoras - Babasonicos.mp3',
+
+            'Samurai - Djavan.mp3',
+            'Blow Away - George Harrison.mp3',
+            "This Time I'm In It For Love - Player.mp3",
+            "Last Train At 25 O'clock - Lamp.mp3",
+            'On Melancholy Hill - Gorillazmp3.mp3',
+            'Turista - Homogenica.mp3',
+            'Word on a Wing - David Bowie.mp3',
+            'The Boy With The Thorn In His Side - The Smiths.mp3',
+            'Dreams Tonite - Alvvays.mp3',
+            "Baby I'm Yours - Arctic Monkeys.mp3",
+            'Dreams - The Cranberries.mp3',
+            'Orbitando - Encargados.mp3',
+            'Heaven Or Las Vegas - Cocteau Twins.mp3',
+            'Just Like Heaven - The Cure mp3.mp3',
+            'I Want To Know What Love Is - Foreigner.mp3',
+            
+            'Night Changes - One Direction.mp3',
+
+            'When the Sun Hits - Slowdive.mp3',
+            '40 Days - Slowdive.mp3',
+            'Nadar Sola - Nenagenix.mp3',
+            'Between Sleep and Awake - Whirr.mp3',
+            'Luna - Wisp.mp3',
+            'Mumble - Whirr.mp3',
+            "Souvenirs D'Un Autre Monde - Alcest.mp3",
+            'don’t ask why - My Bloody Valentine.mp3',
+
+            'A Whiter Shade Of Pale - Procol Harum.mp3',
+
+            'Will You Love Me Tomorrow - Carole King.mp3',
+
+            'Your Song - Elton John.mp3',
+            "We're All Alone - Rita Coolidge.mp3",
+            'Eyes On Me - Fayes Wong.mp3',
+
+            'A Primera Vista - Pedro Aznar.mp3',
+            'El Tiempo Es Veloz - David Lebón.mp3',
+
+            'Arrival - Parannoul.mp3',
+            'Please Stay - Birth Day.mp3',
+
+            'Brite Boy - Alex G.mp3',
+            'Independence Day - Ellioth Smith.mp3',
+            'Dark Sweet Lady - George Harrison.mp3',
+
+            'Words Of Love - Arthur Russell.mp3',
+
+            'A Pillow Of Winds - Pink Floyd.mp3',
+            'Wicked Game - Chris Isaac.mp3',
         ];
 
-        const songComments = {
+        const songComments = {            
+            'Favourite - Fontaines D.C': {
+                1.0: "Oaaaaaa",
+                7.0: "siempre fuiste, sos y seguiras siendo mi favorita mibida<3",
+                13.0: "No sabes la cantidad de veces que escuche esta canción en abril nyehehe",
+                18.0: "Te hice agarrar los anteojos para ver esta letrita?",
+                24.0:"Era muy compliqueti hacerlo mas grande, perdon puch",
+                30.0: "Cualquier cosa te deje esta playlist en mi spoti",
+                36.0: "Y podes ver cuando añadi las canciones nyehehe",
+                42.0: "Te hago spoiler: 14 de mayo",
+                48.0: "Desde ahi ya tenia pensado regalarte esto, pero para nuestro primer mes",
+                53.0: "con el botoncito que hay 2 flechas podes ponerlo aleatorio",
+                59.0: "pero esta en este orden por defecto sisis",
+                64.0: "no veas el codigo fuente de este porfi es un horror",
+                70.0: "Los assts si queres si sisisi"
+            },
+
             'Fade Into You - Mazzy Star': {
                 1.0: "oaaaaa"
             },
-            'Favourite - Fontaines D.C': {
-                1.0: "No sabes la cantidad de veces que escuche esta canción en abril nyehehe",
-                7.0: "siempre fuiste, sos y seguiras siendo mi favorita mibida<3",
-                13.0: "Te hice agarrar los anteojos para ver esta letrita?",
-                18.0: "Era muy compliqueti hacerlo mas grande, perdon puch",
-                24.0:"Cualquier cosa te deje esta playlist en mi spoti",
-                33.0: "For a long timee",
-                39.0: "con el botoncito que hay 2 flechas podes ponerlo aleatorio",
-                45.0: "pero esta en este orden por defecto sisis",
-                51.0: "y la playlist de spoti podes ver la fecha que añadi las canciones nyehehe"
-            }
+
+            'Picture Me Better - Weyes Blood': {
+                1.0: "oaaaaaa"
+            },
+
+            'Sidelines - Phoebe Bridgers': {
+                1.0: "oaaaaaa"
+            },
+
+
         };
         
         const coverImages = [
@@ -639,7 +770,7 @@
                     isTyping = false;
                     if (callback) callback();
                 }
-            }, 70);
+            }, 50);
         }
 
         // Manejar clicks en pantalla de inicio

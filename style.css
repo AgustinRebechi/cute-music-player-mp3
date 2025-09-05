@@ -191,7 +191,7 @@ body {
     background-position: center;
     width: 200px;
     height: 200px;
-    opacity: 0.8;
+    opacity: 0.7;
     z-index: 1;
 }
 
@@ -638,7 +638,7 @@ button:hover {
 
 .click-indicator {
     position: absolute;
-    bottom: 180px;
+    bottom: 150px;
     color: white;
     font-size: 16px;
     justify-content: center;
