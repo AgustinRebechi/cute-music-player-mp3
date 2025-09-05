@@ -7,6 +7,17 @@
     <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
+    <div id="startScreen"       class="start-screen">
+        <div class="cinna-intro">
+            <img src="assets/Cinna/cinnamoroll.gif" id="cinnaIntro" class="cinna-intro-img">
+            <div class="speech-bubble">
+                <div id="introText" class="intro-text"></div>
+                <div class="bubble-arrow"></div>
+            </div>
+        </div>
+        <div class="click-indicator">Click para continuar...</div>
+    </div>
+
     <div class="window-controls">
         <button class="window-btn minimizeBtn" onclick="minimizeWindow()"></button>
         <button class="window-btn closeBtn" onclick="closeWindow()"></button>
@@ -16,6 +27,11 @@
         
         <img src="assets/Cinna/ui/caja1.png" id="bg-img">
         <img src="assets/Cinna/cinna1.png" class="pj">
+        <div id="cinnaSpeech" class="cinna-speech-bubble" style="display: none;">
+            <div id="cinnaText" class="cinna-speech-text"></div>
+            <div class="cinna-bubble-arrow"></div>
+        </div>
+
         <div class="marco"></div>
         
         <div class="marco">
@@ -115,7 +131,17 @@
         const volumeContainer = document.getElementById('volumeContainer');
         const volumeProgress = document.getElementById('volumeProgress');
         const shuffleBtn = document.getElementById('shuffleBtn');
-    
+
+        const introMessages = [
+        "¡Hola mi amor! 💕",
+        "Te hice este reproductor especial...",
+        "¡Con todas tus canciones favoritas!",
+        "¡Espero que te guste mucho! ✨",
+        "¡Dale click para empezar! 🎵"
+        ];
+
+        let currentMessageIndex = 0;
+        let isTyping = false;
 
         const CUSTOM_ORDER = [
             'Fade Into You - Mazzy Star.mp3',
@@ -495,11 +521,160 @@
             updatePlayButtonUI(false);
         });
 
-        // Inicializar al cargar la página
         window.addEventListener('DOMContentLoaded', function() {
-            loadPlaylist();
+            // Iniciar con la pantalla de introducción
+            document.getElementById('startScreen').addEventListener('click', handleIntroClick);
+            
+            // Comenzar con el primer mensaje
+            setTimeout(() => {
+                const introText = document.getElementById('introText');
+                typeText(introMessages[0], introText);
+                currentMessageIndex = 1;
+            }, 1500);
         });
 
+        
+
+        // Función para escribir texto tipo Undertale
+        function typeText(text, element, callback) {
+            if (isTyping) return;
+            isTyping = true;
+            
+            element.textContent = '';
+            let index = 0;
+            
+            const typeInterval = setInterval(() => {
+                if (index < text.length) {
+                    element.textContent += text[index];
+                    index++;
+                    
+                    // Sonido de escritura (opcional)
+                    // playTypeSound();
+                } else {
+                    clearInterval(typeInterval);
+                    isTyping = false;
+                    if (callback) callback();
+                }
+            }, 50); // Velocidad de escritura
+        }
+
+        // Manejar clicks en pantalla de inicio
+        function handleIntroClick() {
+            if (isTyping) return;
+            
+            if (currentMessageIndex < introMessages.length) {
+                const introText = document.getElementById('introText');
+                typeText(introMessages[currentMessageIndex], introText);
+                currentMessageIndex++;
+            } else {
+                // Terminar introducción
+                startMainApp();
+            }
+        }
+
+        // Iniciar aplicación principal
+        function startMainApp() {
+            const startScreen = document.getElementById('startScreen');
+            const mainWindow = document.querySelector('.main-window');
+            
+            startScreen.style.animation = 'fadeOut 1s ease-out forwards';
+            
+            setTimeout(() => {
+                startScreen.style.display = 'none';
+                mainWindow.style.display = 'block';
+                loadPlaylist(); // Cargar playlist después de la intro
+            }, 1000);
+        }
+
+        // CSS para fadeOut
+        const fadeOutCSS = `
+        @keyframes fadeOut {
+            to { opacity: 0; transform: scale(0.9); }
+        }
+        `;        
+
+// Función para que Cinna comente durante las canciones
+function showCinnaSpeech(text, duration = 3000) {
+    const cinnaSpeeech = document.getElementById('cinnaSpeech');
+    const cinnaText = document.getElementById('cinnaText');
+    
+    cinnaText.textContent = text;
+    cinnaSpeeech.style.display = 'block';
+    
+    // Ocultar después del tiempo especificado
+    setTimeout(() => {
+        cinnaSpeeech.style.display = 'none';
+    }, duration);
+}
+
+// Modificar la función updateLyrics para agregar comentarios
+function updateLyrics() {
+    if (currentLyrics.length === 0) return;
+    
+    const currentTime = audioPlayer.currentTime;
+    let currentLyricIndex = -1;
+    
+    // Encontrar la línea actual
+    for (let i = 0; i < currentLyrics.length; i++) {
+        if (currentLyrics[i].time <= currentTime) {
+            currentLyricIndex = i;
+        } else {
+            break;
+        }
+    }
+    
+    // Mostrar líneas: anterior, actual, siguiente
+    if (currentLyricIndex >= 0) {
+        const prevLine = currentLyricIndex > 0 ? currentLyrics[currentLyricIndex - 1] : null;
+        const currentLine = currentLyrics[currentLyricIndex];
+        const nextLine = currentLyricIndex < currentLyrics.length - 1 ? currentLyrics[currentLyricIndex + 1] : null;
+        
+        lyricsLine1.textContent = prevLine ? prevLine.text : '';
+        lyricsLine2.textContent = currentLine ? currentLine.text : '';
+        lyricsLine3.textContent = nextLine ? nextLine.text : '';
+        
+        // Animar línea actual
+        lyricsLine1.className = 'lyrics-line';
+        lyricsLine2.className = 'lyrics-line active';
+        lyricsLine3.className = 'lyrics-line';
+        
+        // AGREGAR COMENTARIOS DE CINNA EN MOMENTOS ESPECÍFICOS
+        checkForCinnaComments(currentTime, currentLine ? currentLine.text : '');
+        }
+        }
+
+        // Función para comentarios específicos
+        function checkForCinnaComments(currentTime, currentLyric) {
+            // Comentarios en tiempos específicos (ejemplo)
+            const timeComments = {
+                3.25: "¡Esta parte me encanta! 💕",
+                15.5: "¿No es hermosa esta canción?",
+                30.0: "Pensé en ti cuando la elegí ✨",
+                60.0: "¡Bailemos juntos! 💃"
+            };
+            
+            // Comentarios basados en letras específicas
+            const lyricComments = {
+                "dream": "¡Como mis sueños contigo! 🌙",
+                "love": "Te amo tanto 💖",
+                "moon": "Como cuando vemos la luna juntos 🌙",
+                "fly": "¡Volemos juntos! ✈️"
+            };
+            
+            // Verificar comentarios por tiempo (con tolerancia de 0.1 segundos)
+            Object.keys(timeComments).forEach(time => {
+                if (Math.abs(currentTime - parseFloat(time)) < 0.1) {
+                    showCinnaSpeech(timeComments[time]);
+                }
+            });
+            
+            // Verificar comentarios por letras
+            Object.keys(lyricComments).forEach(word => {
+                if (currentLyric.toLowerCase().includes(word)) {
+                    showCinnaSpeech(lyricComments[word]);
+                }
+            });
+        }
     </script>
 </body>
 </html>
