@@ -10,7 +10,7 @@ if (process.env.NODE_ENV !== 'production') {
 function createWindow() {
   const win = new BrowserWindow({
     width: 545,
-    height: 1100,
+    height: 900,
     x: 688,
     y: 80,
     webPreferences: {

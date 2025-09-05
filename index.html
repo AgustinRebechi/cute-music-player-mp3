@@ -25,8 +25,6 @@
         <div class="purin"><img src="assets/purin.gif" class="purin-img"></div>
         <div class="hk"><img src="assets/purin2.png" class="hk-img"></div>
                 
-
-        
         <div class="title-song">
             <img src="assets/Cinna/ui/caja4.png" id="bg-title">
             <h2 id="title"></h2>
@@ -34,7 +32,6 @@
 
         <div class="cover">
             <div class="cover-bg" id="cover-bg"></div>
-            <!-- Área de lyrics -->
             <div class="lyrics-container">
                 <div class="lyrics-line" id="lyricsLine1"></div>
                 <div class="lyrics-line" id="lyricsLine2"></div>
@@ -51,22 +48,35 @@
         </div>
 
         <div class="control-panel">
-            <!-- Decoraciones del control panel -->
             <div class="control-decorations">
                 <div class="barra-decoration1"></div>
                 <div class="barra-decoration2"></div>
-                <div class="corazones-decoration1"></div>
-                <div class="corazones-decoration2"></div>
+                <div class="corazones-decoration1">
+                    <div class="heart-individual heart1"></div>
+                    <div class="heart-individual heart2"></div>
+                    <div class="heart-individual heart3"></div>
+                </div>
+                
+                <div class="corazones-decoration2">
+                    <div class="heart-individual  heart1"></div>
+                    <div class="heart-individual heart2"></div>
+                    <div class="heart-individual heart3"></div>
+                </div>
             </div>
-            
-            <!-- Botones de control -->
             <button id="prev" class="prev-btn"></button>            
             <button id="playPause" class="play-btn"></button>
             <button id="next" class="next-btn"></button>
+
+            <div class="additional-controls">
+                <div class="volume-control">
+                    <div class="volume-icon"></div>
+                    <div class="volume-bar" id="volumeContainer">
+                    <div class="volume-progress" id="volumeProgress"></div>
+                </div>
+                <button id="shuffleBtn" class="shuffle-btn"></button>
+            </div>
         </div>        
     </div>
-
-    <h4 class="agos">Te amo, Agos<3</h4>
 
     <!-- Audio element -->
     <audio id="audioPlayer" preload="metadata"></audio>
@@ -78,11 +88,15 @@
         
         let isPlaying = false;
         let isDragging = false;
+        let isVolumeDragging = false;
         let currentSongIndex = 0;
         let playlist = [];
+        let originalPlaylist = []; // Para el shuffle
         let currentLyrics = [];
         let lyricsInterval;
-        let wasPlayingBeforeSkip = false; // Nueva variable para controlar el estado de reproducción
+        let wasPlayingBeforeSkip = false;
+        let isShuffleMode = false;
+        let currentVolume = 0.7; // Volumen por defecto 70%
         
         const playButton = document.getElementById('playPause');
         const audioPlayer = document.getElementById('audioPlayer');
@@ -95,6 +109,23 @@
         const lyricsLine2 = document.getElementById('lyricsLine2');
         const lyricsLine3 = document.getElementById('lyricsLine3');
 
+        const volumeIcon = document.getElementById('volumeIcon');
+        
+        // Nuevos elementos
+        const volumeContainer = document.getElementById('volumeContainer');
+        const volumeProgress = document.getElementById('volumeProgress');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+    
+
+        const CUSTOM_ORDER = [
+            'Fade Into You - Mazzy Star.mp3',
+            'Dream a Little Dream of Me - Ella Fitzgerald.mp3',
+            'La Vie En Rose - Édith Piaf.mp3',
+            'Moon River - Audrey Hepburn.mp3',
+            'Fly Me to the Moon - Frank Sinatra.mp3'
+            // Agrega aquí tus canciones en el orden que prefieras
+        ];
+
         // Función para actualizar la UI del botón play/pause
         function updatePlayButtonUI(playing) {
             if (playing) {
@@ -106,13 +137,23 @@
             }
         }
 
+        // Mezclar array (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
         // Cargar playlist al inicio
         function loadPlaylist() {
             try {
                 const songsDir = path.join(__dirname, 'songs');
                 const files = fs.readdirSync(songsDir);
                 
-                playlist = files
+                const availableSongs = files
                     .filter(file => file.endsWith('.mp3'))
                     .map(file => ({
                         filename: file,
@@ -120,9 +161,32 @@
                         title: file.replace('.mp3', ''),
                         lyricsFile: path.join(songsDir, file.replace('.mp3', '.lrc'))
                     }));
+
+                // Ordenar según el orden personalizado
+                originalPlaylist = [];
+                
+                // Primero agregar las canciones en el orden personalizado
+                CUSTOM_ORDER.forEach(customSong => {
+                    const found = availableSongs.find(song => song.filename === customSong);
+                    if (found) {
+                        originalPlaylist.push(found);
+                    }
+                });
+                
+                // Luego agregar las canciones que no están en el orden personalizado
+                availableSongs.forEach(song => {
+                    if (!CUSTOM_ORDER.includes(song.filename)) {
+                        originalPlaylist.push(song);
+                    }
+                });
+                
+                playlist = [...originalPlaylist];
                 
                 if (playlist.length > 0) {
                     loadSong(0);
+                    // Configurar volumen inicial
+                    audioPlayer.volume = currentVolume;
+                    updateVolumeUI();
                 } else {
                     titleDisplay.textContent = 'No se encontraron canciones';
                 }
@@ -247,6 +311,51 @@
             }
         }
 
+        // Actualizar UI del volumen
+        function updateVolumeUI() {
+            const volumePercent = currentVolume * 100;
+            volumeProgress.style.width = volumePercent + '%';
+        }
+
+        // Control de volumen
+        
+        function updateVolume(e) {
+            const rect = volumeContainer.
+            getBoundingClientRect();
+            const volumeProgress = document.getElementById("volumeProgress");
+
+            const clickX = e.clientX - rect.left;
+            let newVolume = (clickX / rect.width);
+            
+            newVolume = Math.max(0, Math.min(1, newVolume));
+            currentVolume = newVolume;
+            audioPlayer.volume = currentVolume;
+
+            const newProgressPercent = newVolume*100
+            volumeProgress.style.width = newProgressPercent + '%';
+        }
+
+        // Toggle shuffle
+        function toggleShuffle() {
+            isShuffleMode = !isShuffleMode;
+            
+            if (isShuffleMode) {
+                shuffleBtn.classList.add('active');
+                playlist = shuffleArray(originalPlaylist);
+                // Encontrar la canción actual en la nueva playlist mezclada
+                const currentSong = originalPlaylist[currentSongIndex];
+                currentSongIndex = playlist.findIndex(song => song.filename === currentSong.filename);
+            } else {
+                shuffleBtn.classList.remove('active');
+                // Encontrar la canción actual en la playlist original
+                const currentSong = playlist[currentSongIndex];
+                playlist = [...originalPlaylist];
+                currentSongIndex = originalPlaylist.findIndex(song => song.filename === currentSong.filename);
+            }
+        }
+
+        // Event Listeners
+
         // Cargar metadata del audio
         audioPlayer.addEventListener('loadedmetadata', function() {
             if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
@@ -288,11 +397,17 @@
 
         // Cuando termine la canción, ir a la siguiente Y reproducir automáticamente
         audioPlayer.addEventListener('ended', function() {
-            wasPlayingBeforeSkip = true; // La canción terminó, por lo tanto estaba reproduciéndose
+            wasPlayingBeforeSkip = true;
             nextSong();
         });
-        
-        // Click en la barra de progreso
+
+        // Control de volumen - Click y drag
+        volumeContainer.addEventListener('mousedown', function(e) {
+            isVolumeDragging = true;
+            updateVolume(e);
+        });
+
+        // Barra de progreso - Click en la barra de progreso
         progressContainer.addEventListener('mousedown', function(e) {
             if (audioPlayer.duration) {
                 isDragging = true;
@@ -300,17 +415,24 @@
             }
         });
 
-        // Arrastrar el corazón
+        // Arrastrar el corazón y el volumen
         document.addEventListener('mousemove', function(e) {
             if (isDragging) {
                 updateProgress(e);
             }
+            if (isVolumeDragging) {
+                updateVolume(e);
+            }
         });
 
-        // Soltar el corazón
+        // Soltar el corazón y el volumen
         document.addEventListener('mouseup', function() {
             isDragging = false;
+            isVolumeDragging = false;
         });
+
+        // Botón shuffle
+        shuffleBtn.addEventListener('click', toggleShuffle);
 
         // Función para actualizar el progreso al arrastrar
         function updateProgress(e) {
@@ -332,14 +454,14 @@
 
         // Canción anterior
         function previousSong() {
-            wasPlayingBeforeSkip = isPlaying; // Guardar el estado actual
+            wasPlayingBeforeSkip = isPlaying;
             const newIndex = currentSongIndex > 0 ? currentSongIndex - 1 : playlist.length - 1;
             loadSong(newIndex, wasPlayingBeforeSkip);
         }
 
         // Siguiente canción
         function nextSong() {
-            wasPlayingBeforeSkip = wasPlayingBeforeSkip || isPlaying; // Guardar el estado actual
+            wasPlayingBeforeSkip = wasPlayingBeforeSkip || isPlaying;
             const newIndex = currentSongIndex < playlist.length - 1 ? currentSongIndex + 1 : 0;
             loadSong(newIndex, wasPlayingBeforeSkip);
         }
@@ -360,8 +482,8 @@
         // Error handling para el audio
         audioPlayer.addEventListener('error', function(e) {
             console.error('Error de audio:', e);
-            wasPlayingBeforeSkip = isPlaying; // Guardar estado antes del error
-            nextSong(); // Intentar siguiente canción si hay error
+            wasPlayingBeforeSkip = isPlaying;
+            nextSong();
         });
 
         // Event listeners adicionales para controlar el estado del botón
@@ -377,6 +499,7 @@
         window.addEventListener('DOMContentLoaded', function() {
             loadPlaylist();
         });
+
     </script>
 </body>
 </html>
