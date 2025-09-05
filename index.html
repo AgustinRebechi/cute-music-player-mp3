@@ -135,9 +135,9 @@
         const introMessages = [
         "Hola mibida ¿Cómo estás?",
         "Espero estes teniendo un bonito dia",
-        "Si no es el caso, no te preocupes. Quiero que sepas que siempre voy a estar para vos, no importa lo que pase",
+        "Si no es el caso, no te preocupes.  Siempre voy a estar junto a vos, no importa lo que pase",
         "cada vez que estas mal se me derrumba el mundo :(",
-        "Te amo mucho <3",
+        "Te amo mucho, Agos <3",
         ];
 
         let currentMessageIndex = 0;
@@ -145,14 +145,14 @@
 
         const CUSTOM_ORDER = [
             'Favourite - Fontaines D.C.mp3',
+            'Fade Into You - Mazzy Star.mp3',
+            'All I Wanted - Paramore.mp3',
+            'James Dean & Audrey Hepburn - SWS.mp3',
             'Love Takes Miles - Cameron Winter.mp3',
             'For Lovers - Lamp.mp3',
             'Love Songs On The Radio - Mojave 3.mp3',
             'Here, There and Everywhere - Emmylou Harris.mp3',
-            'Fade Into You - Mazzy Star.mp3',
-
-            'All I Wanted - Paramore.mp3',
-            'James Dean & Audrey Hepburn - SWS.mp3',
+            
 
             'Till There Was You - The Beatles.mp3',
             'Thirteen - Big Star.mp3',
@@ -173,8 +173,6 @@
 
             'Picture Me Better - Weyes Blood.mp3',
             'Sidelines - Phoebe Bridgers.mp3',
-
-            "I Don't Care If You're Contagious - PTV.mp3",
             
             "First Day of My Life - Bright Eyes.mp3",
             'You Belong to Me - Jason Wade.mp3',
@@ -185,6 +183,7 @@
 
             'Be My Angel - Mazzy Star.mp3',
             'Halah - Mazzy Star.mp3',
+            
     
             'God Only Knows - The Beach Boys.mp3',
             'Songbird - Fleetwood Mac.mp3',
@@ -261,6 +260,8 @@
 
             'A Pillow Of Winds - Pink Floyd.mp3',
             'Wicked Game - Chris Isaac.mp3',
+
+            "I Don't Care If You're Contagious - PTV.mp3",
         ];
 
         const songComments = {            
@@ -281,7 +282,8 @@
             },
 
             'Fade Into You - Mazzy Star': {
-                1.0: "oaaaaa"
+                1.0: "oaaaaa",
+                10.0: "asdasdasdasd"
             },
 
             'Picture Me Better - Weyes Blood': {
@@ -489,9 +491,14 @@
 
         // Actualizar lyrics en tiempo real
         function updateLyrics() {
+            const currentTime = audioPlayer.currentTime;
+            
+            // COMENTARIOS DE CINNA - MOVER AQUÍ ARRIBA, antes del check de lyrics
+            checkForCinnaComments(currentTime, '');
+            
+            // Ahora sí verificar si hay lyrics para mostrar
             if (currentLyrics.length === 0) return;
             
-            const currentTime = audioPlayer.currentTime;
             let currentLyricIndex = -1;
             
             // Encontrar la línea actual
@@ -518,8 +525,8 @@
                 lyricsLine2.className = 'lyrics-line active';
                 lyricsLine3.className = 'lyrics-line';
                 
-                // COMENTARIOS DE CINNA
-                checkForCinnaComments(currentTime, currentLine ? currentLine.text : '');
+                // Si hay lyrics, también pasar el texto actual a los comentarios
+                // (pero ya se ejecutó arriba de todas formas)
             }
         }
 
@@ -586,7 +593,6 @@
                 const minutes = Math.floor(audioPlayer.currentTime / 60);
                 const seconds = Math.floor(audioPlayer.currentTime % 60);
                 currentTimeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
                 // Actualizar lyrics
                 updateLyrics();
             }
@@ -848,9 +854,19 @@
         function checkForCinnaComments(currentTime, currentLyric) {
             const currentSong = playlist[currentSongIndex]?.title;
             
-            if (!currentSong || !songComments[currentSong]) return;
+            if (!currentSong) return;
             
-            const songData = songComments[currentSong];
+            // Buscar comentarios usando diferentes formatos del nombre
+            let songData = songComments[currentSong];
+            
+            // Si no encuentra, intentar con el nombre original del archivo
+            if (!songData && playlist[currentSongIndex]) {
+                const originalFilename = playlist[currentSongIndex].filename;
+                const titleFromFilename = originalFilename.replace('.mp3', '');
+                songData = songComments[titleFromFilename];
+            }
+            
+            if (!songData) return;
             
             Object.keys(songData).forEach(time => {
                 const targetTime = parseFloat(time);
