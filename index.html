@@ -42,9 +42,9 @@
         <div class="hk"><img src="assets/purin2.png" class="hk-img"></div>
                 
         <div class="title-song">
-            <img src="assets/Cinna/ui/caja4.png" id="bg-title">
             <h2 id="title"></h2>
         </div>
+        <img src="assets/Cinna/ui/caja4.png" id="bg-title">
 
         <div class="cover">
             <div class="cover-bg" id="cover-bg"></div>
@@ -134,9 +134,9 @@
 
         const introMessages = [
         "Hola mibida ¿Cómo estás?",
-        "Espero estes teniendo un bonito dia",
+        "Espero estés teniendo un bonito día",
         "Si no es el caso, quiero que sepas que siempre voy a estar junto a vos, no importa lo que pase",
-        "cada vez que estas mal se me derrumba el mundo :(",
+        "Cada vez que estás mal se me derrumba el mundo :(",
         "Te amo mucho, Agos <3",
         ];
 
@@ -148,16 +148,15 @@
             'Hate To See Your Heart Break - Paramore.mp3',
             'All I Wanted - Paramore.mp3',
             'James Dean & Audrey Hepburn - SWS.mp3',
-            'Love Takes Miles - Cameron Winter.mp3',
-            'Fade Into You - Mazzy Star.mp3',
-            'For Lovers - Lamp.mp3',
+            'Fade Into You - Mazzy Star.mp3',            
             'Love Songs On The Radio - Mojave 3.mp3',
             'Here, There and Everywhere - Emmylou Harris.mp3',
-        
+            'For Lovers - Lamp.mp3',
+            'Milk - Sweet Trip.mp3',
+            'Love Takes Miles - Cameron Winter.mp3',        
             'Till There Was You - The Beatles.mp3',
             'Thirteen - Big Star.mp3',
 
-            'Milk - Sweet Trip.mp3',
             '슈게이저 - Misty Blue.mp3',
             '妖精の手招き - Ichiko Aoba.mp3',
             "j's lullaby - Delaney Bailey.mp3",
@@ -167,6 +166,7 @@
             'Save Me a Place - Fleetwood Mac.mp3',
             'In My Life - The Beatles.mp3',
             'Deirdre - Beach Boys.mp3',
+            'God Only Knows - The Beach Boys.mp3',
 
             'My One And Only Love - John Coltrane.mp3',
             "I'm Glad There Is You - Julie London.mp3",
@@ -184,8 +184,6 @@
             'Be My Angel - Mazzy Star.mp3',
             'Halah - Mazzy Star.mp3',
             
-    
-            'God Only Knows - The Beach Boys.mp3',
             'Songbird - Fleetwood Mac.mp3',
             'Kiss Me - Sixpence None the Richer.mp3',
             'Music When The Lights Go Out - The Libertines.mp3',
@@ -254,6 +252,7 @@
             'Brite Boy - Alex G.mp3',
             'Independence Day - Ellioth Smith.mp3',
             'Dark Sweet Lady - George Harrison.mp3',
+            'I Need You - America',
 
             'Words Of Love - Arthur Russell.mp3',
 
@@ -261,6 +260,7 @@
             'Wicked Game - Chris Isaac.mp3',
 
             "I Don't Care If You're Contagious - PTV.mp3",
+            
         ];
 
         const songComments = {            
@@ -288,6 +288,7 @@
                 9.0: "que lo arregle tu viejo",
                 17.0: "una pinta de saber de javascript tiene",
                 25.0: '"Inquietudes por las Tecnologias de la informacion" tiene tu viejo en linkedin',
+                35.0: "cof cof"
             },
 
             'All I Wanted - Paramore': {
@@ -314,6 +315,11 @@
                 37.0: "Lo leeras esto? no lo sé, tampoco era mi objetivo",
                 43.0: "esto es solo una manera de devolverte algo de todo lo que significas para mi",
                 49.0: "Te amo"
+            },
+
+            'Here, There and Everywhere - Emmylou Harris':{
+                1.0: "Esta canción originalmente era de los beatles",
+                7.0: "Pero elegí esta version porque me parece muy dulce"
             },
 
             'Reel Around the Fountain - The Smiths':{
@@ -424,6 +430,8 @@
                 
                 audioPlayer.src = song.path;
                 titleDisplay.textContent = song.title;
+
+                setupTitleScrolling();
 
                 const coverIndex = currentSongIndex % coverImages.length;
                 const newCoverPath = `./assets/Cinna/ui/${coverImages[coverIndex]}`;
@@ -807,7 +815,7 @@
                     isTyping = false;
                     if (callback) callback();
                 }
-            }, 50);
+            }, 1);
         }
 
         // Manejar clicks en pantalla de inicio
@@ -947,6 +955,73 @@
         // Desactivar sonidos de tipeo (ej: al pasar a la ventana principal)
         function stopTypeSounds() {
             typeSoundEnabled = false;
+        }
+
+        // Función para configurar el scroll del título - ARREGLADA
+        function setupTitleScrolling() {
+            const titleElement = document.getElementById('title');
+            const containerElement = document.querySelector('.title-song');
+            
+            if (!titleElement || !containerElement) return;
+            
+            // Limpiar animación anterior
+            titleElement.classList.remove('scrolling');
+            titleElement.style.removeProperty('--scroll-distance');
+            titleElement.style.removeProperty('--scroll-duration');
+            titleElement.style.textAlign = 'center'; // Volver al centrado por defecto
+            
+            // Esperar un frame para que se actualice el texto
+            setTimeout(() => {
+                // Crear un elemento temporal para medir el texto completo
+                const tempElement = titleElement.cloneNode(true);
+                tempElement.style.position = 'absolute';
+                tempElement.style.visibility = 'hidden';
+                tempElement.style.whiteSpace = 'nowrap';
+                tempElement.style.width = 'auto';
+                tempElement.style.transform = 'none';
+                tempElement.style.fontSize = '24px';
+                document.body.appendChild(tempElement);
+                
+                const titleWidth = tempElement.offsetWidth;
+                document.body.removeChild(tempElement);
+                
+                // Ancho disponible real - usar tu max-width menos padding
+                const availableWidth = 200; // 335px max-width - 40px padding = 295px
+                
+                console.log(`Midiendo título: "${titleElement.textContent}"
+                    Ancho del texto: ${titleWidth}px
+                    Ancho disponible: ${availableWidth}px`);
+                
+                // Solo hacer scroll si REALMENTE no cabe
+                if (titleWidth > availableWidth) {
+                    // Calcular cuánto sobra
+                    const overflowWidth = titleWidth - availableWidth;
+                    
+                    // CLAVE: Solo moverse lo justo y necesario para mostrar el final
+                    // No moverse más de lo que sobra + un pequeño margen
+                    const scrollDistance = -(titleWidth - 300);
+                    
+                    // Duración proporcional pero más lenta
+                    const baseDuration = 5; // 5 segundos base (más lento)
+                    const extraDuration = overflowWidth / 60; // Más tiempo por cada 60px
+                    const totalDuration = baseDuration + extraDuration;
+                    
+                    titleElement.style.setProperty('--scroll-distance', scrollDistance + 'px');
+                    titleElement.style.setProperty('--scroll-duration', totalDuration + 's');
+                    
+                    titleElement.style.textAlign = 'left';
+                    titleElement.classList.add('scrolling');
+                    
+                    console.log(`SCROLL ACTIVADO:
+                        Texto: "${titleElement.textContent}"
+                        Overflow: ${overflowWidth}px
+                        Distancia scroll: ${scrollDistance}px
+                        Duración: ${totalDuration}s`);
+                } else {
+                    console.log(`"${titleElement.textContent}" cabe normal - mantener centrado`);
+                    titleElement.style.textAlign = 'center';
+                }
+            }, 100);
         }
 
 

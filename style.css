@@ -17,15 +17,16 @@ body {
     overflow: hidden;
 }
 
+
 .window-controls {
     position: absolute;
-    top: 10px;
+    top: 4px;
     right: 80px;
     z-index: 5;
     display: flex;
     gap: 10px;
+    -webkit-app-region: no-drag;
 }
-
 .window-btn {
     width: 35px;
     height: 35px;
@@ -93,7 +94,11 @@ body {
     left: 14%;
     transform: translateX(-50%);
     z-index: 3;
-    pointer-events: none;
+    
+    /* La imagen puede ser draggable O no, como prefieras */
+    pointer-events: none; /* Si quieres que pase los clicks al fondo */
+    /* O puedes poner: -webkit-app-region: drag; si quieres que también arrastre */
+    
     animation: float 3s ease-in-out infinite;
 }
 
@@ -113,8 +118,23 @@ body {
     position: relative;
     margin-top: 155px;
     opacity: 97%;
+    
+    /* Hacer draggable toda la ventana */
     -webkit-app-region: drag;
+    
     animation: mainWindowAppear 1.5s ease-out forwards;
+}
+
+/* IMPORTANTE: Todos los elementos interactivos deben ser NO-DRAG */
+.window-controls,
+.window-btn,
+button,
+.progress-bar,
+.volume-bar,
+.shuffle-btn,
+.control-panel,
+.heart-individual {
+    -webkit-app-region: no-drag;
 }
 
 @keyframes mainWindowAppear {
@@ -144,27 +164,72 @@ body {
 
 .title-song {
     position: absolute;
-    top: 5px;
+    top: 17px;
     left: 50%;
     transform: translateX(-50%);
     margin: 50px auto;
-    display: flex;
+    display: inline-block;
     align-items: center;
     justify-content: center;
+    width: 330px;
+    height: 40px;
+    overflow: hidden;
+    -webkit-app-region: drag;
+    z-index:2;
+    border-radius: 15px;
 }
 
 #bg-title {
     position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 50px auto;
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
     z-index: 1;
 }
 
 #title {
-    position: relative;
-    z-index: 2;
+    position: absolute;
+    z-index: 4;
     color: #afdfea;
+    text-align: "right";
+    margin: 10;
+    font-size: 24px;
+    white-space: nowrap;
+    display: inline-block;
+    top: 3px;
+    margin-left: 15px;
+    
+    text-align: left;
+}
+
+#title:not(.scrolling) {
     text-align: center;
-    margin: 0;
-    font-size: 24px;    
+}
+
+/* Animación de scroll - MEJORADA */
+@keyframes scroll-title {
+    0% {
+        transform: translateX(0);
+    }
+    15% {
+        transform: translateX(0); /* Pausa al inicio */
+    }
+    85% {
+        transform: translateX(var(--scroll-distance)); /* Desplazar completamente */
+    }
+    100% {
+        transform: translateX(var(--scroll-distance)); /* Pausa al final */
+    }
+}
+
+/* Clase que se aplica cuando el título necesita scroll */
+#title.scrolling {
+    animation: scroll-title var(--scroll-duration) linear infinite;
+    
 }
 
 .cover {
