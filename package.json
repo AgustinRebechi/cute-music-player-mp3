@@ -6,7 +6,7 @@
   "scripts": {
     "start": "electron .",
     "build": "electron-builder",
-    "dist": "electron-builder --publish=never"
+    "dist": "electron-builder"
   },
   "keywords": [],
   "author": "Agustin Rebechi",
@@ -15,5 +15,29 @@
     "electron": "^38.0.0",
     "electron-builder": "^26.0.12",
     "electron-reload": "^2.0.0-alpha.1"
+  },
+  "build": {
+  "appId": "Para Agos",
+  "productName": "Para Agos, con mucho amor",
+  "files": [
+    "main.js",
+    "renderer.js",
+    "index.html",
+    "style.css",
+    "songs/",
+    "assets/"
+  ],
+  "win": {
+    "target": "nsis",
+    "icon": "assets/icon.ico"
+  },
+  "mac": {
+    "target": "dmg",
+    "icon": "assets/icon.icns"
+  },
+  "linux": {
+    "target": "AppImage",
+    "icon": "assets/icon.png"
   }
+}
 }

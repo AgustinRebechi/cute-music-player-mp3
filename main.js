@@ -1,9 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron/main');
 const path = require('node:path');
 
-if (process.env.NODE_ENV !== 'production') {
+// Solo si 'app' no es undefined (una comprobación de seguridad) y si NO estamos en producción
+if (app && !app.isPackaged) {
     require('electron-reload')(__dirname, {
-        electron: path.join(__dirname, 'node_modules', '.bin', 'electron')
+        electron: require('path').join(__dirname, 'node_modules', '.bin', 'electron')
     });
 }
 
