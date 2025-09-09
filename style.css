@@ -16,6 +16,7 @@ html, body {
   /* Solo el tamaño base de tu diseño. */
   width: 545px;
   height: 900px;
+  position: relative;
 }
 
 /* ... el resto de tu CSS no necesita cambios ... */
@@ -27,7 +28,7 @@ html, body {
     padding: 0;
     box-sizing: border-box;
     user-select: none;
-    opacity: 99.2%;
+    opacity: 100%;
     -webkit-user-drag: none;
 }
 
@@ -843,7 +844,7 @@ button:hover {
 
 
 .start-screen {
-    position: fixed;
+    position: absolute;
     top: 0;
     left: 0;
     width: 100vw;
