@@ -1,5 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap');
 
+/* --- Responsive wrapper (no tocar muy seguido) --- */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent; /* si querés transparencia */
+  overflow: hidden;
+}
+
+#app {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 545px;
+  height: 900px;
+  transform-origin: top center;
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+
+
 * {
     margin: 1px;
     padding: 0;
@@ -822,8 +844,8 @@ button:hover {
 
 .start-screen {
     position: fixed;
-    top: 0;
-    left: 0;
+    top: -22%;
+    left: -15%;
     width: 100vw;
     height: 100vh;
     background: transparent;

@@ -7,14 +7,15 @@
     <link rel="stylesheet" href="style.css"> 
 </head>
 <body>
-    <div id="startScreen"       class="start-screen">
+    <div id="app">
+        <div id="startScreen"       class="start-screen">
         <div class="cinna-intro">
             <img src="assets/Cinna/cinnamoroll.gif" id="cinnaIntro" class="cinna-intro-img">
             <div class="speech-bubble">
                 <div id="introText" class="intro-text"></div>
             </div>
         </div>
-        <div class="click-indicator">clicksito para seguir sisisi</div>
+        <div    class="click-indicator">clicksito para seguir sisisi</div>
     </div>
 
     
@@ -103,7 +104,8 @@
                 <button id="shuffleBtn" class="shuffle-btn"></button>
             </div>
         </div>        
-    </div>
+    </div></div>
+    
 
     <!-- Audio element -->
     <audio id="audioPlayer" preload="metadata"></audio>
@@ -1053,6 +1055,20 @@
                 }
             }, 100);
         }
+
+        ipcRenderer.on('apply-scale', (event, scale) => {
+            console.log(`Aplicando escala: ${scale}`);
+            
+            // Si la escala es menor a 1 (pantalla pequeña), aplicar transformación CSS
+            if (scale < 1) {
+                document.body.style.transform = `scale(${scale})`;
+                document.body.style.transformOrigin = 'top left';
+                document.body.style.overflow = 'hidden';
+                
+                // Opcional: mostrar un mensaje discreto
+                console.log(`Ventana escalada al ${Math.round(scale * 100)}% para adaptarse a tu pantalla`);
+            }
+        });
 
 
     </script>
