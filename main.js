@@ -1,88 +1,67 @@
+// main.js
+
 const { app, BrowserWindow, ipcMain, screen } = require('electron/main');
 const path = require('node:path');
 
-// hot-reload si no estás en producción (opcional)
-if (app && !app.isPackaged) {
-  require('electron-reload')(__dirname, {
-    electron: require('path').join(__dirname, 'node_modules', '.bin', 'electron')
-  });
-}
+// (Opcional pero recomendado) Forzar la escala a 1 para evitar el "zoom" del SO
+// Esto hace que nuestro cálculo de escala sea el único que importa.
+app.commandLine.appendSwitch('force-device-scale-factor', '1');
 
-// --- Ajustá estas constantes si querés otra "base" ---
-const BASE_WIDTH = 545;   // ancho en px que usaste como referencia en tu CSS
-const BASE_HEIGHT = 900;  // alto en px de referencia
-const MIN_SCALE = 0.9;   // escala mínima para que no quede diminuto (ajustalo si querés)
+// --- Constantes de tu diseño ---
+const BASE_WIDTH = 545;
+const BASE_HEIGHT = 900;
 
 function createWindow() {
-  const display = screen.getPrimaryDisplay();
-  const { width: displayW, height: displayH } = display.workAreaSize;
+  // 1. Obtener el tamaño de la pantalla del usuario
+  const primaryDisplay = screen.getPrimaryDisplay();
+  const { width: displayW, height: displayH } = primaryDisplay.workAreaSize;
 
-  // no dejamos la ventana más grande que la pantalla
-  const winWidth = Math.min(BASE_WIDTH, displayW);
-  const winHeight = Math.min(BASE_HEIGHT, displayH);
+  // 2. Calcular la escala necesaria para que quepa la aplicación
+  // Se usará el factor más restrictivo (ancho o alto)
+  // Math.min(1, ...) asegura que nunca escalemos hacia arriba (más grande que el 100%)
+  const scale = Math.min(1, displayW / BASE_WIDTH, displayH / BASE_HEIGHT);
+
+  // 3. Calcular el tamaño final de la ventana basado en la escala
+  const winWidth = Math.floor(BASE_WIDTH * scale);
+  const winHeight = Math.floor(BASE_HEIGHT * scale);
 
   const win = new BrowserWindow({
-    width: winWidth,
-    height: winHeight,
+    width: winWidth,     // Usamos el ancho calculado
+    height: winHeight,   // Usamos el alto calculado
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     },
-    resizable: true,
+    resizable: false,    // ¡IMPORTANTE! Esto soluciona el problema de redimensionamiento
     transparent: true,
     frame: false,
     icon: path.join(__dirname, 'assets/cinna1.png'),
-    titleBarStyle: 'hidden'
+    titleBarStyle: 'hidden',
+    // (Opcional) Para que la ventana no sea demasiado pequeña
+    minWidth: Math.floor(BASE_WIDTH * 0.5),
+    minHeight: Math.floor(BASE_HEIGHT * 0.5),
   });
 
-  win.center();
+  win.center(); // Centra la ventana ya con el tamaño correcto
   win.loadFile('index.html');
+  
+  // win.webContents.openDevTools(); // Descomenta para depurar
 
-  // función que calcula escala y la aplica en el renderer
-  const applyScale = () => {
-    const { width: w, height: h } = win.getBounds();
-    // escala basada en la comparación con el diseño base
-    let scale = Math.min(1, w / BASE_WIDTH, h / BASE_HEIGHT);
-    if (scale < MIN_SCALE) scale = MIN_SCALE;
-
-    // Inyectamos JS que crea/ajusta #app y aplica la transform
+  // 4. Cuando la página cargue, le decimos que escale el contenido
+  win.webContents.on('did-finish-load', () => {
+    // Inyectamos CSS para escalar el contenedor #app
+    // Es más simple y seguro que el script anterior
     win.webContents.executeJavaScript(`
-      (function(){
-        const scale = ${scale};
-        let app = document.getElementById('app');
-
-        if (!app) {
-          app = document.createElement('div');
-          app.id = 'app';
-          // mover todo el body dentro de #app (si no lo tenés envuelto ya)
-          while (document.body.firstChild) {
-            app.appendChild(document.body.firstChild);
-          }
-          document.body.appendChild(app);
-        }
-
-        // estilos que garantizan que el layout quede relativo al #app
-        app.style.position = 'absolute';
-        app.style.left = '50%';
-        app.style.top = '0';
-        app.style.width = '${BASE_WIDTH}px';
-        app.style.height = '${BASE_HEIGHT}px';
-        app.style.transformOrigin = 'top center';
-        // centrar horizontalmente y escalar
-        app.style.transform = 'translate(-50%, -50%) scale(' + scale + ')';
-        app.style.top = '50%'; // aseguramos que esté en el medio
-
-        // evitar scroll y ajustar body (por si aparece scrollbar)
-        document.body.style.width = '100%';
-        document.body.style.height = '100%';
-        document.body.style.margin = '0';
-        document.body.style.overflow = 'hidden';
-      })();
-    `).catch(err => console.error('applyScale error:', err));
-  };
-
-  win.webContents.on('did-finish-load', applyScale);
-  win.on('resize', applyScale);
+      const appContainer = document.getElementById('app');
+      if (appContainer) {
+        appContainer.style.position = 'absolute';
+        appContainer.style.left = '50%';
+        appContainer.style.top = '50%';
+        appContainer.style.transformOrigin = 'center center';
+        appContainer.style.transform = 'translate(-50%, -50%) scale(${scale})';
+      }
+    `).catch(err => console.error('Error al aplicar escala:', err));
+  });
 
   return win;
 }
@@ -90,14 +69,18 @@ function createWindow() {
 app.whenReady().then(createWindow);
 
 app.on('window-all-closed', () => {
-  app.quit();
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  if (BrowserWindow.getAllWindows().length === 0) {
+    createWindow();
+  }
 });
 
-// tus handlers ipcMain (los dejo como estaban)
+// Tus handlers de IPC (están perfectos)
 ipcMain.on('minimize-window', (event) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (win) win.minimize();
