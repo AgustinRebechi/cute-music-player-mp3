@@ -191,6 +191,8 @@ button,
     z-index: 1;
 }
 
+
+/* Título - configuración base */
 #title {
     position: absolute;
     z-index: 4;
@@ -200,7 +202,10 @@ button,
     white-space: nowrap;
     display: inline-block;
     top: 3px;
-    margin-left: 15px;    
+    margin-left: 15px;
+    width: calc(100% - 30px); /* Usar todo el ancho disponible menos márgenes */
+    
+    /* POR DEFECTO: texto centrado */
     text-align: center;
 }
 
@@ -227,8 +232,7 @@ button,
 /* Clase que se aplica cuando el título necesita scroll */
 #title.scrolling {
     animation: scroll-title var(--scroll-duration) linear infinite;
-    text-align: left;
-    
+    text-align: left; /* Solo cuando hace scroll se alinea a la izquierda */
 }
 
 .cover {

@@ -144,11 +144,11 @@
         const introTextEl = document.getElementById('introText');
 
         const introMessages = [
-        "Hola mibida ¿Cómo estás? Soy Agus.",
+        "Hola, mibida ¿Cómo estás? Soy Agus.",
         "Espero estés teniendo un bonito día",
-        "Quiero que sepas que mi lugar en este mundo siempre va a ser a tu lado",
-        "Y, que siempre vas a tener mi mano para sostener y mi hombro para apoyarte.",
-        "Te amo muchísimo, Agos <3",
+        "No paro de pensar que mi lugar en este mundo es junto a vos.",
+        "Que mi mano siempre va a buscar la tuya y mi hombro va a estar ahí, cuando lo necesites",
+        "Te amo, Agos <3",
         ];
 
         let currentMessageIndex = 0;
@@ -156,6 +156,9 @@
 
         const CUSTOM_ORDER = [
             'For Lovers - Lamp.mp3',
+            'はるなつあきふゆ - Ichiko Aoba.mp3',
+            "月の丘 - Ichiko Aoba.mp3",
+            '妖精の手招き - Ichiko Aoba.mp3',
             'Love Songs On The Radio - Mojave 3.mp3',
             'Here, There and Everywhere - Emmylou Harris.mp3',
             'Thirteen - Big Star.mp3',
@@ -174,7 +177,6 @@
             'A Waltz For a Night - Julie Delpy.mp3',
             'Milk - Sweet Trip.mp3',
             '슈게이저 - Misty Blue.mp3',
-            '妖精の手招き - Ichiko Aoba.mp3',
             "j's lullaby - Delaney Bailey.mp3",
 
             'Save Me a Place - Fleetwood Mac.mp3',
@@ -203,8 +205,10 @@
 
             'About You - The 1975.mp3',
             'By Starlight - Smashing Pumpkins.mp3',
-            'There Is a Light That Never Goes Out - The Smiths.mp3',
+            "I Don't Owe You Anything - The Smiths.mp3",
 
+            'There Is a Light That Never Goes Out - The Smiths.mp3',
+        
             'How Deep Is Your Love - Bee Gees.mp3',
             
 
@@ -229,10 +233,12 @@
             'Heaven Or Las Vegas - Cocteau Twins.mp3',
             'I Want To Know What Love Is - Foreigner.mp3',
             
+            
             'Night Changes - One Direction.mp3',
 
             'When the Sun Hits - Slowdive.mp3',
             '40 Days - Slowdive.mp3',
+            'Alison - Slowdive.mp3',
             'Nadar Sola - Nenagenix.mp3',
             'Between Sleep and Awake - Whirr.mp3',
             'Luna - Wisp.mp3',
@@ -257,8 +263,12 @@
             'Dark Sweet Lady - George Harrison.mp3',
 
             'Words Of Love - Arthur Russell.mp3',
+            'Word on a Wing - David Bowie.mp3',
+            "I Won't Share You - The Smiths.mp3",
 
             'A Pillow Of Winds - Pink Floyd.mp3',
+
+            'Dreams Tonite - Alvvays.mp3',
 
             "I Don't Care If You're Contagious - Pierce The Veil.mp3",
 
@@ -269,7 +279,7 @@
         const songComments = {
             
             'For Lovers - Lamp': {
-                1.0: "<3",
+                2.0: "<3",
             },
             
             'Favourite - Fontaines D.C': {
@@ -284,19 +294,17 @@
                 65.0: "Y podes ver cuando añadi las canciones nyehehe",
                 73.0: "Te hago spoiler: 14 de mayo",
                 81.0: "Desde ahi ya tenia pensado regalarte esto, pero para nuestro primer mes",
-                89.0: "con el botoncito que hay 2 flechas podes ponerlo aleatorio",
-                97.0: "pero esta en este orden por defecto sisis",
-                105.0: "no veas el codigo fuente de este porfi es un horror",
-                113.0: "Los assts si queres si sisisi",
                 121.0: "Yo voy a aparecer cada tanto para hablarte en algunos minutos",
             },
 
             'Hate To See Your Heart Break - Paramore':{
-                1.0: "uy me salio re chueco el titulin",
-                9.0: "que lo arregle tu viejo",
-                17.0: "una pinta de saber de javascript tiene",
-                25.0: '"Inquietudes por las Tecnologias de la informacion" tiene tu viejo en linkedin',
-                35.0: "cof cof"
+                1.0: "cof cof",
+                7.0: "uy me salio re chueco el titulin",
+                15.0: "que lo arregle tu viejo",
+                23.0: "una pinta de saber de javascript tiene",
+                30.0: '"Inquietudes por las Tecnologias de la informacion" tiene tu viejo en linkedin',
+                37.0: "Soy el yo del futuro, no salio chueco el titulo",
+                45.0: "que capo soy"
             },
 
             'All I Wanted - Paramore': {
@@ -317,11 +325,11 @@
                 5.0: "Esta es probablemente la cancion que más escuche durante los primeros dias",
                 10.0: "Mas alla de que habla sobre una persona que te dejo de amar",
                 15.0: 'Y lentamente te desaveneces dentro de ella',
-                20.0: 'Hay cierta puresa, ternura y amor honesto detras que me hizo sentir acobijado',
+                20.0: 'Hay cierta puresa, ternura y amor honesto detras que me hizo sentir',
                 25.0: "Esta y todas las de mazzy starr me hacen volver a ese abril/mayo",
                 30.0: "donde me quedaba desvelado pensando en vos",
                 35.0: "como ahora, que son las 12am del 5/9",
-                40.0: "estoy hace 13hs (cronometrado) de arreglar bugs y cargar todos los mp3 acá",
+                40.0: "estoy hace 13hs de arreglar bugs y cargar todos los mp3 acá",
                 45.0: "Si estoy escribiendo esto es porque me tomé el descansito de hacer algo diver dsps de hacerlo funcionar",
                 50.0: "Lo leeras esto? no lo sé, tampoco era mi objetivo",
                 55.0: "esto es solo una manera de devolverte algo de todo lo que significas para mi",
@@ -334,8 +342,10 @@
             },
 
             '슈게이저 - Misty Blue': {
-                1.0: 'amor no puedo traducir mas canciones:(',
-                7.0: 'tengo que estudiar si no me desheredan'
+                1.0: 'amor no puedo traducir mas canciones :(',
+                7.0: 'tengo que estudiar si no me desheredan',
+                15.0: 'vuelve mi yo del futuro, al final lo hice nyehehehe',
+                21.0:'lo que hace el desempleo'
             },
 
             'Save Me a Place - Fleetwood Mac':{
@@ -343,7 +353,7 @@
             },
 
             'Reel Around the Fountain - The Smiths':{
-                63.0: "15 minutos dice"
+                63.0: "15 minutos tira"
             },
 
             "I Won't Share You - The Smiths": {
@@ -363,9 +373,9 @@
         
         const coverImages = [
             'caja3-8.png',
-            'caja3-1.png',
             'caja3-2.png',
             'caja3-3.png',
+            'caja3-1.png',
             'caja3-4.png',
             'caja3-5.png',
             'caja3-6.png',
@@ -982,7 +992,7 @@
             typeSoundEnabled = false;
         }
 
-        // Función para configurar el scroll del título - ARREGLADA
+        // Función para configurar el scroll del título - ARREGLADA PARA CENTRAR TEXTOS CORTOS
         function setupTitleScrolling() {
             const titleElement = document.getElementById('title');
             const containerElement = document.querySelector('.title-song');
@@ -993,7 +1003,6 @@
             titleElement.classList.remove('scrolling');
             titleElement.style.removeProperty('--scroll-distance');
             titleElement.style.removeProperty('--scroll-duration');
-            titleElement.style.textAlign = 'center'; // Volver al centrado por defecto
             
             // Esperar un frame para que se actualice el texto
             setTimeout(() => {
@@ -1011,7 +1020,7 @@
                 document.body.removeChild(tempElement);
                 
                 // Ancho disponible real - usar tu max-width menos padding
-                const availableWidth = 334; // 335px max-width - 40px padding = 295px
+                const availableWidth = 330; // 334px disponibles en el contenedor
                 
                 console.log(`Midiendo título: "${titleElement.textContent}"
                     Ancho del texto: ${titleWidth}px
@@ -1019,36 +1028,28 @@
                 
                 // Solo hacer scroll si REALMENTE no cabe
                 if (titleWidth > availableWidth) {
-                    // Calcular cuánto sobra
-                    const overflowWidth = titleWidth - availableWidth;
-                    
-                    // CLAVE: Solo moverse lo justo y necesario para mostrar el final
-                    // No moverse más de lo que sobra + un pequeño margen
+                    // TEXTO LARGO - necesita scroll
                     const scrollDistance = -(titleWidth - 300);
-                    
-                    // Duración proporcional pero más lenta
-                    const baseDuration = 5; // 5 segundos base (más lento)
-                    const extraDuration = overflowWidth / 60; // Más tiempo por cada 60px
+                    const baseDuration = 5;
+                    const extraDuration = (titleWidth - availableWidth) / 60;
                     const totalDuration = baseDuration + extraDuration;
                     
                     titleElement.style.setProperty('--scroll-distance', scrollDistance + 'px');
                     titleElement.style.setProperty('--scroll-duration', totalDuration + 's');
                     
-                    titleElement.style.textAlign = 'left';
                     titleElement.classList.add('scrolling');
                     
                     console.log(`SCROLL ACTIVADO:
                         Texto: "${titleElement.textContent}"
-                        Overflow: ${overflowWidth}px
                         Distancia scroll: ${scrollDistance}px
                         Duración: ${totalDuration}s`);
                 } else {
-                     // ¡ÚNICA ACCIÓN! Quitar la clase. El CSS se encargará de centrarlo.
+                    // TEXTO CORTO - debe quedar centrado
                     titleElement.classList.remove('scrolling');
-                    
-                    // Limpiamos las variables por si acaso
                     titleElement.style.removeProperty('--scroll-distance');
                     titleElement.style.removeProperty('--scroll-duration');
+                    
+                    console.log(`TEXTO CENTRADO: "${titleElement.textContent}" (${titleWidth}px cabe en ${availableWidth}px)`);
                 }
             }, 100);
         }
