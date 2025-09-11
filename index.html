@@ -114,6 +114,10 @@
     <script src="src/utils/LRCParser.js"></script>
     <script src="src/utils/ShuffleUtils.js"></script>
     <script src="src/models/Song.js"></script>
+    <script src="src/utils/TextUtils.js"></script>
+    <script src="src/services/CommentService.js"></script>
+    <script src="src/services/FileService.js"></script>
+    <script src="src/controllers/UIController.js"></script>
 
     <script>
         const { ipcRenderer } = require('electron');
@@ -131,7 +135,6 @@
         let wasPlayingBeforeSkip = false;
         let isShuffleMode = false;
         let currentVolume = 0.7; 
-        let lastCommentTime = -1;
         
         const playButton = document.getElementById('playPause');
         const audioPlayer = document.getElementById('audioPlayer');
@@ -373,12 +376,9 @@
             'Please, Please, Please, Let Me Get What I Want - The Smiths': {
                 1.0:"cancion mufa"
             }
-
-
-            
-
-
         };
+        
+        const commentService = new CommentService(songComments);
         
         const coverImages = [
             'caja3-8.png',
@@ -395,63 +395,23 @@
             'caja3-14.png',
         ]
 
-        // Función para actualizar la UI del botón play/pause
-        function updatePlayButtonUI(playing) {
-            if (playing) {
-                playButton.className = 'pause-btn';
-                isPlaying = true;
-            } else {
-                playButton.className = 'play-btn';
-                isPlaying = false;
-            }
-        }
+        // Crear controlador de UI
+        const uiController = new UIController();
 
         // Cargar playlist al inicio
         function loadPlaylist() {
-            try {
-                const songsDir = path.join(__dirname, 'songs');
-                const files = fs.readdirSync(songsDir);
-                
-                const availableSongs = files
-                    .filter(file => file.endsWith('.mp3'))
-                    .map(file => ({
-                        filename: file,
-                        path: path.join(songsDir, file),
-                        title: file.replace('.mp3', ''),
-                        lyricsFile: path.join(songsDir, file.replace('.mp3', '.lrc'))
-                    }));
-
-                // Ordenar según el orden personalizado
-                originalPlaylist = [];
-                
-                // Primero agregar las canciones en el orden personalizado
-                CUSTOM_ORDER.forEach(customSong => {
-                    const found = availableSongs.find(song => song.filename === customSong);
-                    if (found) {
-                        originalPlaylist.push(new Song(found.filename, found.path, found.title, found.lyricsFile));
-                    }
-                });
-                
-                // Luego agregar las canciones que no están en el orden personalizado
-                availableSongs.forEach(song => {
-                    if (!CUSTOM_ORDER.includes(song.filename)) {
-                        originalPlaylist.push(song);
-                    }
-                });
-                
+            const loadedSongs = FileService.loadPlaylist(CUSTOM_ORDER);
+            
+            if (loadedSongs.length > 0) {
+                originalPlaylist = [...loadedSongs];
                 playlist = [...originalPlaylist];
                 
-                if (playlist.length > 0) {
-                    loadSong(0);
-                    // Configurar volumen inicial
-                    audioPlayer.volume = currentVolume;
-                    updateVolumeUI();
-                } else {
-                    titleDisplay.textContent = 'No se encontraron canciones';
-                }
-            } catch (error) {
-                console.error('Error cargando playlist:', error);
-                titleDisplay.textContent = 'Error cargando canciones';
+                loadSong(0);
+                // Configurar volumen inicial
+                audioPlayer.volume = currentVolume;
+                uiController.updateVolumeUI();
+            } else {
+                titleDisplay.textContent = 'No se encontraron canciones';
             }
         }
 
@@ -459,6 +419,7 @@
         function loadSong(index, autoplay = false) {
             if (index >= 0 && index < playlist.length) {
                 currentSongIndex = index;
+                commentService.resetComments();
                 lastCommentTime = -1;
                 const song = playlist[index];
                 
@@ -484,15 +445,15 @@
                 if (autoplay) {
                     audioPlayer.addEventListener('loadeddata', function playWhenReady() {
                         audioPlayer.play().then(() => {
-                            updatePlayButtonUI(true);
+                            uiController.updatePlayButton(true);
                         }).catch(error => {
                             console.error('Error al reproducir automáticamente:', error);
-                            updatePlayButtonUI(false);
+                            uiController.updatePlayButton(false);
                         });
                         audioPlayer.removeEventListener('loadeddata', playWhenReady);
                     });
                 } else {
-                    updatePlayButtonUI(false);
+                    uiController.updatePlayButton(false);
                 }
             }
         }
@@ -581,13 +542,7 @@
                 // (pero ya se ejecutó arriba de todas formas)
             }
         }
-
-        // Actualizar UI del volumen
-        function updateVolumeUI() {
-            const volumePercent = currentVolume * 100;
-            volumeProgress.style.width = volumePercent + '%';
-        }
-
+        
         // Control de volumen
         
         function updateVolume(e) {
@@ -650,10 +605,10 @@
         playButton.addEventListener('click', function() {
             if (isPlaying) {
                 audioPlayer.pause();
-                updatePlayButtonUI(false);
+                uiController.updatePlayButton(false);
             } else {
                 audioPlayer.play().then(() => {
-                    updatePlayButtonUI(true);
+                    uiController.updatePlayButton(true);
                 }).catch(error => {
                     console.error('Error al reproducir:', error);
                     alert('Error al cargar la canción');
@@ -775,11 +730,11 @@
 
         // Event listeners adicionales para controlar el estado del botón
         audioPlayer.addEventListener('play', function() {
-            updatePlayButtonUI(true);
+            uiController.updatePlayButton(true);
         });
 
         audioPlayer.addEventListener('pause', function() {
-            updatePlayButtonUI(false);
+            uiController.updatePlayButton(false);
         });
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -831,7 +786,7 @@
             
             if (currentMessageIndex < introMessages.length) {
                 // Si todavía hay mensajes, muestra el siguiente
-                typeText(introMessages[currentMessageIndex], introTextEl);
+                TextUtils.typeText(introMessages[currentMessageIndex], introTextEl);
                 currentMessageIndex++;
             } else {
                 // Terminar introducción
@@ -899,29 +854,13 @@
             
         function checkForCinnaComments(currentTime, currentLyric) {
             const currentSong = playlist[currentSongIndex]?.title;
-            
             if (!currentSong) return;
             
-            // Buscar comentarios usando diferentes formatos del nombre
-            let songData = songComments[currentSong];
-            
-            // Si no encuentra, intentar con el nombre original del archivo
-            if (!songData && playlist[currentSongIndex]) {
-                const originalFilename = playlist[currentSongIndex].filename;
-                const titleFromFilename = originalFilename.replace('.mp3', '');
-                songData = songComments[titleFromFilename];
+            const comment = commentService.checkForComments(currentTime, currentSong);
+            if (comment) {
+                showCinnaSpeech(comment);
             }
-            
-            if (!songData) return;
-            
-            Object.keys(songData).forEach(time => {
-                const targetTime = parseFloat(time);
-                if (Math.abs(currentTime - targetTime) < 0.2 && lastCommentTime !== targetTime) {
-                    showCinnaSpeech(songData[time]);
-                    lastCommentTime = targetTime;
-                }
-            });
-        }
+}
 
         // ===== Web Audio API para sonido de tipeo =====
         const AudioContext = window.AudioContext || window.webkitAudioContext;
