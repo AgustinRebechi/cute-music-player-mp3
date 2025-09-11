@@ -110,6 +110,11 @@
     <!-- Audio element -->
     <audio id="audioPlayer" preload="metadata"></audio>
 
+    <script src="src/utils/TimeFormatter.js"></script>
+    <script src="src/utils/LRCParser.js"></script>
+    <script src="src/utils/ShuffleUtils.js"></script>
+    <script src="src/models/Song.js"></script>
+
     <script>
         const { ipcRenderer } = require('electron');
         const fs = require('fs');
@@ -401,16 +406,6 @@
             }
         }
 
-        // Mezclar array (Fisher-Yates shuffle)
-        function shuffleArray(array) {
-            const shuffled = [...array];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-            return shuffled;
-        }
-
         // Cargar playlist al inicio
         function loadPlaylist() {
             try {
@@ -433,7 +428,7 @@
                 CUSTOM_ORDER.forEach(customSong => {
                     const found = availableSongs.find(song => song.filename === customSong);
                     if (found) {
-                        originalPlaylist.push(found);
+                        originalPlaylist.push(new Song(found.filename, found.path, found.title, found.lyricsFile));
                     }
                 });
                 
@@ -507,7 +502,7 @@
             try {
                 if (fs.existsSync(lyricsPath)) {
                     const lyricsContent = fs.readFileSync(lyricsPath, 'utf8');
-                    currentLyrics = parseLRC(lyricsContent);
+                    currentLyrics = LRCParser.parse(lyricsContent);
                 } else {
                     currentLyrics = [];
                     console.log('No se encontró archivo de lyrics:', lyricsPath);
@@ -516,27 +511,6 @@
                 console.error('Error cargando lyrics:', error);
                 currentLyrics = [];
             }
-        }
-
-        // Parser para formato LRC
-        function parseLRC(lrcContent) {
-            const lyrics = [];
-            const lines = lrcContent.split('\n');
-            
-            for (const line of lines) {
-                const match = line.match(/\[(\d{2}):(\d{2})\.(\d{2})\](.*)/);
-                if (match) {
-                    const minutes = parseInt(match[1]);
-                    const seconds = parseInt(match[2]);
-                    const centiseconds = parseInt(match[3]);
-                    const text = match[4].trim();
-                    
-                    const timeInSeconds = minutes * 60 + seconds + (centiseconds / 100);
-                    lyrics.push({ time: timeInSeconds, text: text });
-                }
-            }
-            
-            return lyrics.sort((a, b) => a.time - b.time);
         }
 
         // Limpiar lyrics
@@ -638,8 +612,7 @@
             
             if (isShuffleMode) {
                 shuffleBtn.classList.add('active');
-                playlist = shuffleArray(originalPlaylist);
-                // Encontrar la canción actual en la nueva playlist mezclada
+                playlist = ShuffleUtils.shuffle(originalPlaylist)
                 const currentSong = originalPlaylist[currentSongIndex];
                 currentSongIndex = playlist.findIndex(song => song.filename === currentSong.filename);
             } else {
@@ -656,9 +629,8 @@
         // Cargar metadata del audio
         audioPlayer.addEventListener('loadedmetadata', function() {
             if (audioPlayer.duration && !isNaN(audioPlayer.duration)) {
-                const minutes = Math.floor(audioPlayer.duration / 60);
-                const seconds = Math.floor(audioPlayer.duration % 60);
-                durationDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                currentTimeDisplay.textContent = TimeFormatter.formatTime(audioPlayer.currentTime);
+                durationDisplay.textContent = TimeFormatter.formatTime(audioPlayer.duration);
             }
         });
 
@@ -668,9 +640,7 @@
                 const progress = (audioPlayer.currentTime / audioPlayer.duration) * 100;
                 progressBar.style.width = progress + '%';
                 
-                const minutes = Math.floor(audioPlayer.currentTime / 60);
-                const seconds = Math.floor(audioPlayer.currentTime % 60);
-                currentTimeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                currentTimeDisplay.textContent = TimeFormatter.formatTime(audioPlayer.currentTime);
                 // Actualizar lyrics
                 updateLyrics();
             }
@@ -742,9 +712,7 @@
             if (audioPlayer.duration) {
                 audioPlayer.currentTime = (newProgress / 100) * audioPlayer.duration;
                 
-                const minutes = Math.floor(audioPlayer.currentTime / 60);
-                const seconds = Math.floor(audioPlayer.currentTime % 60);
-                currentTimeDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                currentTimeDisplay.textContent = TimeFormatter.formatTime(audioPlayer.currentTime);
             }
         }
 
